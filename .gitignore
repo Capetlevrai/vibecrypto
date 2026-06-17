@@ -32,6 +32,15 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# db (Turso local file)
+*.db
+*.db-journal
+local.db*
+
+# drizzle migrations output is committed, but keep tmp out
+
 
 # vercel
 .vercel

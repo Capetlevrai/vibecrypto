@@ -1,0 +1,22 @@
+name: refresh
+
+on:
+  schedule:
+    # toutes les 15 minutes (les cron GitHub peuvent avoir quelques minutes de retard)
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger ingest endpoint
+        run: |
+          set -e
+          code=$(curl -s -o /tmp/body -w "%{http_code}" \
+            -X POST \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.REFRESH_URL }}")
+          echo "HTTP $code"
+          cat /tmp/body
+          if [ "$code" != "200" ]; then exit 1; fi
