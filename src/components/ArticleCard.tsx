@@ -69,7 +69,10 @@ export function ArticleCard({
           />
           {article.sourceName ?? SOURCE_LABELS[article.source]}
         </span>
-        <span title={article.publishedAt ? new Date(article.publishedAt).toLocaleString("fr-FR") : ""}>
+        <span
+          suppressHydrationWarning
+          title={article.publishedAt ? new Date(article.publishedAt).toLocaleString("fr-FR") : ""}
+        >
           {formatHour(article.publishedAt)} · {timeAgo(article.publishedAt)}
         </span>
       </div>
@@ -167,7 +170,7 @@ export function ArticleCard({
       </div>
 
       {article.summaryModel && (
-        <div className="text-[10px] text-[var(--muted)]">
+        <div className="text-[10px] text-[var(--muted)]" suppressHydrationWarning>
           Résumé via {article.summaryModel}
           {article.summaryAt ? ` · ${timeAgo(article.summaryAt)}` : ""}
         </div>
