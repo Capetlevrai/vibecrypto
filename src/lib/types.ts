@@ -75,6 +75,7 @@ export interface Article {
   summaryModel: string | null;
   summaryAt: number | null;
   url: string;
+  imageUrl: string | null;
   source: Source;
   sourceName: string | null;
   publishedAt: number | null;

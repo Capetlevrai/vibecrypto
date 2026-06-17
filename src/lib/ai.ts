@@ -55,7 +55,7 @@ export function availableModels(): ModelDef[] {
   return models.filter((m): m is ModelDef => m !== null);
 }
 
-function getClient(m: ModelDef): LanguageModel {
+export function getClient(m: ModelDef): LanguageModel {
   if (m.kind === "anthropic") {
     const provider = createAnthropic({ apiKey: m.apiKey });
     return provider(m.modelId);

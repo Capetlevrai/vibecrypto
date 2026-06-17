@@ -22,6 +22,7 @@ function mapRow(r: typeof articles.$inferSelect): Article {
     summaryModel: r.summaryModel,
     summaryAt: r.summaryAt,
     url: r.url,
+    imageUrl: r.imageUrl,
     source: r.source as Article["source"],
     sourceName: r.sourceName,
     publishedAt: r.publishedAt,

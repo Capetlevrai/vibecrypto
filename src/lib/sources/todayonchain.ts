@@ -25,12 +25,17 @@ export const todayonchain: SourceAdapter = {
       const sourceName = $card.find(".api_article_source").first().text().trim();
       const dt = $card.find("time").first().attr("datetime");
       const id = $card.attr("id");
+      let imgSrc = $card.find(".api_article_image img").first().attr("src");
+      if (imgSrc && !imgSrc.startsWith("http")) {
+        imgSrc = `https://www.todayonchain.com${imgSrc}`;
+      }
       const anchor = $card.closest("a").attr("href");
       let href = anchor ?? (id ? `/news/article/${id}/` : "");
       if (href && !href.startsWith("http")) href = `https://www.todayonchain.com${href}`;
       out.push({
         title,
         url: href,
+        imageUrl: imgSrc || undefined,
         excerpt: excerpt.slice(0, 600),
         rawContent: `${title}. ${excerpt}`.slice(0, 6000),
         publishedAt: dt ? Date.parse(dt) : undefined,

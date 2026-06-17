@@ -66,6 +66,7 @@ export async function runIngest(opts: { only?: string[] } = {}): Promise<IngestR
         summaryModel: null,
         summaryAt: null,
         url: r.url,
+        imageUrl: r.imageUrl?.slice(0, 1000) ?? null,
         urlHash: urlHash(r.url),
         source: r.source,
         sourceName: r.sourceName ?? null,

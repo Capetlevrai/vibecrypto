@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import { FilterBar } from "@/components/FilterBar";
 import { ArticleCard } from "@/components/ArticleCard";
 import { RefreshButton } from "@/components/RefreshButton";
+import { LanguageProvider } from "@/components/LanguageProvider";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { getArticles, getArticleCounts } from "@/lib/queries";
 import { parseFilters } from "@/lib/filters";
 import { availableModels } from "@/lib/ai";
@@ -21,34 +23,39 @@ export default async function Page(props: PageProps<"/">) {
   const models = availableModels().map((m) => ({ id: m.id, label: m.label }));
 
   return (
-    <main className="mx-auto max-w-6xl flex-1 px-4 py-6">
-      <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Vibe<span className="text-[var(--accent)]">Crypto</span>
-          </h1>
-          <p className="text-sm text-[var(--muted)]">
-            Veille multi-sources · {counts.total} articles ({counts.withSummary} résumés)
-            {lastRefresh ? ` · dernier refresh ${timeAgo(lastRefresh)}` : " · aucune donnée encore"}
-          </p>
-        </div>
-        <RefreshButton />
-      </header>
+    <LanguageProvider articles={items.map((a) => ({ id: a.id, title: a.title, hook: a.hook }))}>
+      <main className="mx-auto max-w-6xl flex-1 px-4 py-6">
+        <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Vibe<span className="text-[var(--accent)]">Crypto</span>
+            </h1>
+            <p className="text-sm text-[var(--muted)]">
+              Veille multi-sources · {counts.total} articles ({counts.withSummary} résumés)
+              {lastRefresh ? ` · dernier refresh ${timeAgo(lastRefresh)}` : " · aucune donnée encore"}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <LanguageSelector />
+            <RefreshButton />
+          </div>
+        </header>
 
-      <Suspense fallback={null}>
-        <FilterBar total={items.length} />
-      </Suspense>
+        <Suspense fallback={null}>
+          <FilterBar total={items.length} />
+        </Suspense>
 
-      {items.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {items.map((a) => (
-            <ArticleCard key={a.id} article={a} models={models} />
-          ))}
-        </div>
-      )}
-    </main>
+        {items.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {items.map((a) => (
+              <ArticleCard key={a.id} article={a} models={models} />
+            ))}
+          </div>
+        )}
+      </main>
+    </LanguageProvider>
   );
 }
 

@@ -8,6 +8,7 @@ import type { ModelDef } from "@/lib/ai";
 import { ASSET_LABELS, EXCHANGE_LABELS, SOURCE_COLORS, SOURCE_LABELS } from "@/lib/types";
 import { formatHour, timeAgo } from "@/lib/fmt";
 import { cn } from "@/lib/cn";
+import { useLanguage } from "./LanguageProvider";
 
 export function ArticleCard({
   article,
@@ -17,9 +18,13 @@ export function ArticleCard({
   models: Pick<ModelDef, "id" | "label">[];
 }) {
   const router = useRouter();
+  const { translate } = useLanguage();
   const [pending, startTransition] = useTransition();
   const [model, setModel] = useState(models[0]?.id ?? "");
   const [error, setError] = useState<string | null>(null);
+  const [imgError, setImgError] = useState(false);
+
+  const translated = translate(article.id, { title: article.title, hook: article.hook });
 
   function summarize() {
     setError(null);
@@ -43,7 +48,19 @@ export function ArticleCard({
   const hasSummary = Boolean(article.summary);
 
   return (
-    <article className="group relative flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)]/80 p-4 backdrop-blur transition hover:border-[var(--accent)]/40 hover:bg-[var(--surface)]">
+    <article className="group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]/80 p-4 backdrop-blur transition hover:border-[var(--accent)]/40 hover:bg-[var(--surface)]">
+      {article.imageUrl && !imgError && (
+        <div className="relative -mx-4 -mt-4 mb-1 h-32 overflow-hidden bg-[var(--background)]">
+          <img
+            src={article.imageUrl}
+            alt={translated.title}
+            loading="lazy"
+            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+            onError={() => setImgError(true)}
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--surface)] via-transparent to-transparent" />
+        </div>
+      )}
       <div className="flex items-center justify-between gap-2 text-xs text-[var(--muted)]">
         <span className="inline-flex items-center gap-1.5 font-medium">
           <span
@@ -59,13 +76,13 @@ export function ArticleCard({
 
       <h3 className="text-base font-semibold leading-snug">
         <Link href={`/item/${article.id}`} className="hover:text-[var(--accent)]">
-          {article.title}
+          {translated.title}
         </Link>
       </h3>
 
-      {article.hook && (
+      {translated.hook && (
         <p className="border-l-2 border-[var(--accent)]/60 pl-2 text-sm italic text-[var(--foreground)]/90">
-          {article.hook}
+          {translated.hook}
         </p>
       )}
 

@@ -11,6 +11,7 @@ export const articles = sqliteTable(
     summaryModel: text("summary_model"),
     summaryAt: integer("summary_at"),
     url: text("url").notNull(),
+    imageUrl: text("image_url"),
     urlHash: text("url_hash").notNull(),
     source: text("source").notNull(),
     sourceName: text("source_name"),
