@@ -136,6 +136,7 @@ export function ArticleCard({
           {models.length > 0 ? (
             <>
               <select
+                suppressHydrationWarning
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
                 disabled={pending}
