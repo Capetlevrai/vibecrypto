@@ -51,6 +51,11 @@ export function availableModels(): ModelDef[] {
       baseURL: "https://api.openai.com/v1",
       modelId: env.OPENAI_MODEL || "gpt-4o-mini",
     }),
+    def("deepseek", "DeepSeek", env.DEEPSEEK_API_KEY, {
+      kind: "openai-compat",
+      baseURL: "https://api.deepseek.com",
+      modelId: env.DEEPSEEK_MODEL || "deepseek-chat",
+    }),
   ];
   return models.filter((m): m is ModelDef => m !== null);
 }

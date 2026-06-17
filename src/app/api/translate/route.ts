@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateObject } from "ai";
-import { z } from "zod";
+import { generateText } from "ai";
 import { resolveModel, getClient } from "@/lib/ai";
 
 export const dynamic = "force-dynamic";
@@ -34,32 +33,27 @@ export async function POST(req: Request) {
 
   try {
     const model = resolveModel(undefined);
-    const { object } = await generateObject({
+    const { text } = await generateText({
       model: getClient(model),
-      schemaName: "translations",
-      schema: z.object({
-        items: z.array(
-          z.object({
-            id: z.string(),
-            title: z.string(),
-            hook: z.string(),
-          }),
-        ),
-      }),
       temperature: 0.2,
       system:
         `You are a professional crypto news translator. Translate to ${targetName}. ` +
-        `Rules: keep token tickers (BTC, ETH, SOL, HYPE…), exchange names (OKX, Binance, " +
-        "Coinbase…), URLs, and numbers exactly as-is. Be natural and concise. ` +
-        `Return one translation per item, preserving the id.`,
+        `Keep token tickers (BTC, ETH, SOL, HYPE), exchange names (OKX, Binance, Coinbase), ` +
+        `URLs, and numbers exactly as-is. Be natural and concise. ` +
+        `Output ONLY valid JSON, no markdown fences, no explanation.`,
       prompt:
-        `Translate the "title" and "hook" of each item to ${targetName}.\n\n` +
-        `Items (JSON):\n${JSON.stringify(items)}`,
+        `Translate the "title" and "hook" of each item to ${targetName}. ` +
+        `Return a JSON object where each key is the item id, and the value is ` +
+        `{"title": "...", "hook": "..."}. Output ONLY the JSON object.\n\n` +
+        `Items:\n${JSON.stringify(items)}`,
     });
 
+    const cleaned = text.replace(/```json\s*|\s*```/g, "").trim();
+    const parsed = JSON.parse(cleaned);
     const results: Record<string, { title: string; hook: string }> = {};
-    for (const t of object.items) {
-      results[t.id] = { title: t.title, hook: t.hook };
+    for (const [id, val] of Object.entries(parsed)) {
+      const v = val as { title?: string; hook?: string };
+      if (v.title) results[id] = { title: String(v.title), hook: String(v.hook ?? "") };
     }
     return NextResponse.json({ lang, results });
   } catch (e) {
