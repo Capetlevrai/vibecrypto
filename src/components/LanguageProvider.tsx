@@ -85,26 +85,35 @@ export function LanguageProvider({
     const cached = loadCache(lang);
     const need = articles.filter((a) => !cached[a.id]);
     if (need.length === 0) return;
+
     let cancelled = false;
-    fetch("/api/translate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        lang,
-        items: articles.map((a) => ({ id: a.id, title: a.title, hook: a.hook ?? "" })),
-      }),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        if (cancelled || !data.results) return;
-        const merged = { ...loadCache(lang), ...data.results };
-        saveCache(lang, merged);
-        setFetched(merged);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    const CHUNK = 20;
+
+    (async () => {
+      for (let i = 0; i < need.length; i += CHUNK) {
+        if (cancelled) return;
+        const chunk = need.slice(i, i + CHUNK);
+        try {
+          const res = await fetch("/api/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              lang,
+              items: chunk.map((a) => ({ id: a.id, title: a.title, hook: a.hook ?? "" })),
+            }),
+          });
+          const data = await res.json();
+          if (cancelled || !data.results) continue;
+          const merged = { ...loadCache(lang), ...data.results };
+          saveCache(lang, merged);
+          setFetched({ ...merged });
+        } catch {
+          /* chunk failed — skip, will retry next time */
+        }
+      }
+      if (!cancelled) setLoading(false);
+    })();
+
     return () => {
       cancelled = true;
     };
