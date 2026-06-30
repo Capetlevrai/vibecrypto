@@ -37,11 +37,11 @@ export function FilterBar({
     0;
 
   return (
-    <div className="sticky top-0 z-20 -mx-4 mb-6 border-b border-[var(--border)] bg-[var(--background)]/80 px-4 py-3 backdrop-blur-md">
+    <div className="sticky top-0 z-20 -mx-4 mb-5 border-b border-[var(--border)] bg-[var(--background)]/85 px-4 py-3 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl flex-col gap-2.5">
         <FilterGroup label="Assets">
           {ASSETS.map((a) => (
-            <Chip key={a} active={filters.assets.includes(a)} onClick={() => onToggle("assets", a)} tone="accent">
+            <Chip key={a} active={filters.assets.includes(a)} onClick={() => onToggle("assets", a)} tone="asset">
               {ASSET_LABELS[a]}
             </Chip>
           ))}
@@ -49,7 +49,7 @@ export function FilterBar({
 
         <FilterGroup label="Exchanges">
           {EXCHANGES.map((e) => (
-            <Chip key={e} active={filters.exchanges.includes(e)} onClick={() => onToggle("exchanges", e)} tone="accent2">
+            <Chip key={e} active={filters.exchanges.includes(e)} onClick={() => onToggle("exchanges", e)} tone="exchange">
               {EXCHANGE_LABELS[e]}
             </Chip>
           ))}
@@ -57,32 +57,39 @@ export function FilterBar({
 
         <FilterGroup label="Sources">
           {SOURCES.map((s) => (
-            <Chip key={s} active={filters.sources.includes(s)} onClick={() => onToggle("sources", s)} tone="muted">
+            <Chip key={s} active={filters.sources.includes(s)} onClick={() => onToggle("sources", s)} tone="bone">
               {SOURCE_LABELS[s]}
             </Chip>
           ))}
         </FilterGroup>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            type="search"
-            placeholder="Rechercher (titre, résumé…)"
-            value={filters.q}
-            onChange={(e) => onSearch(e.target.value)}
-            className="min-w-[200px] flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm outline-none transition-colors placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
-          />
-          <Chip active={filters.hasSummary} onClick={onToggleSummary} tone="accent">
+        <div className="flex flex-wrap items-center gap-2 pt-0.5">
+          <div className="relative min-w-[200px] flex-1">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-[var(--muted)]">
+              /
+            </span>
+            <input
+              type="search"
+              placeholder="rechercher (titre, résumé…)"
+              value={filters.q}
+              onChange={(e) => onSearch(e.target.value)}
+              className="w-full rounded-md border border-[var(--border)] bg-[var(--surface)] py-1.5 pl-7 pr-3 text-sm outline-none transition-colors placeholder:text-[var(--muted)] focus:border-[var(--marker)]"
+            />
+          </div>
+          <Chip active={filters.hasSummary} onClick={onToggleSummary} tone="asset">
             Avec résumé
           </Chip>
           {anyFilter && (
             <button
               onClick={onReset}
-              className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-xs text-[var(--muted)] hover:text-[var(--foreground)]"
+              className="rounded-md border border-[var(--border)] px-2.5 py-1 font-mono text-[11px] uppercase tracking-wide text-[var(--muted)] transition-colors hover:border-[var(--alert)]/50 hover:text-[var(--alert)]"
             >
-              Réinitialiser
+              Reset
             </button>
           )}
-          <span className="ml-auto text-xs text-[var(--muted)]">{total} articles</span>
+          <span className="ml-auto font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+            <span className="text-[var(--foreground)]">{total}</span> résultats
+          </span>
         </div>
       </div>
     </div>
@@ -92,11 +99,19 @@ export function FilterBar({
 function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className="mr-1 w-[70px] text-[10px] uppercase tracking-wider text-[var(--muted)]">{label}</span>
+      <span className="mr-1 w-[68px] shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">
+        {label}
+      </span>
       {children}
     </div>
   );
 }
+
+const TONES = {
+  asset: "border-[var(--asset)] bg-[var(--asset)] text-[var(--background)]",
+  exchange: "border-[var(--exchange)] bg-[var(--exchange)] text-[var(--background)]",
+  bone: "border-[var(--foreground)] bg-[var(--foreground)] text-[var(--background)]",
+} as const;
 
 function Chip({
   active,
@@ -107,21 +122,16 @@ function Chip({
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
-  tone: "accent" | "accent2" | "muted";
+  tone: keyof typeof TONES;
 }) {
-  const tones = {
-    accent: "border-[var(--accent)]/60 bg-[var(--accent)]/20 text-[var(--accent)]",
-    accent2: "border-[var(--accent-2)]/60 bg-[var(--accent-2)]/20 text-[var(--accent-2)]",
-    muted: "border-[var(--foreground)]/40 bg-[var(--foreground)]/10 text-[var(--foreground)]",
-  } as const;
   return (
     <button
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "rounded-full border px-2.5 py-1 text-xs font-medium transition duration-150 hover:-translate-y-px",
+        "rounded-md border px-2.5 py-1 font-mono text-[11px] font-medium tracking-wide transition duration-150",
         active
-          ? tones[tone]
+          ? TONES[tone]
           : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--foreground)]/40 hover:text-[var(--foreground)]",
       )}
     >

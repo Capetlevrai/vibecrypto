@@ -87,47 +87,31 @@ export function ArticleFeed({ articles }: { articles: Article[] }) {
       />
 
       <div className="mb-4 flex items-center justify-between gap-2">
-        <div className="inline-flex items-center gap-0.5 rounded-lg border border-[var(--border)] bg-[var(--surface)]/60 p-0.5 text-xs font-medium">
-          <button
-            type="button"
-            onClick={() => selectLang("fr")}
-            aria-pressed={lang === "fr"}
-            className={cn(
-              "rounded-md px-2.5 py-1 transition-colors",
-              lang === "fr" ? "bg-[var(--accent)]/20 text-[var(--accent)]" : "text-[var(--muted)] hover:text-[var(--foreground)]",
-            )}
-          >
-            🇫🇷 Français
-          </button>
-          <button
-            type="button"
-            onClick={() => selectLang("source")}
-            aria-pressed={lang === "source"}
-            className={cn(
-              "rounded-md px-2.5 py-1 transition-colors",
-              lang === "source" ? "bg-[var(--accent)]/20 text-[var(--accent)]" : "text-[var(--muted)] hover:text-[var(--foreground)]",
-            )}
-          >
-            🌐 Source
-          </button>
+        <div className="inline-flex items-center gap-0.5 rounded-md border border-[var(--border)] bg-[var(--surface)]/60 p-0.5 font-mono text-[11px] font-medium">
+          <Segment active={lang === "fr"} onClick={() => selectLang("fr")} label="Afficher en français">
+            FR
+          </Segment>
+          <Segment active={lang === "source"} onClick={() => selectLang("source")} label="Afficher la langue source">
+            Source
+          </Segment>
         </div>
 
-        <div className="inline-flex items-center gap-0.5 rounded-lg border border-[var(--border)] bg-[var(--surface)]/60 p-0.5">
-          <ToggleButton label="Vue liste" active={view === "list"} onClick={() => select("list")}>
+        <div className="inline-flex items-center gap-0.5 rounded-md border border-[var(--border)] bg-[var(--surface)]/60 p-0.5">
+          <IconToggle label="Vue liste" active={view === "list"} onClick={() => select("list")}>
             <ListIcon />
-          </ToggleButton>
-          <ToggleButton label="Vue blocs" active={view === "grid"} onClick={() => select("grid")}>
+          </IconToggle>
+          <IconToggle label="Vue blocs" active={view === "grid"} onClick={() => select("grid")}>
             <GridIcon />
-          </ToggleButton>
+          </IconToggle>
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[var(--border)] p-10 text-center text-sm text-[var(--muted)]">
-          Aucun article pour ces filtres.
+        <div className="rounded-lg border border-dashed border-[var(--border)] p-10 text-center font-mono text-xs uppercase tracking-wider text-[var(--muted)]">
+          Aucune dépêche pour ces filtres
         </div>
       ) : view === "list" ? (
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-2">
           {filtered.map((a) => (
             <ArticleRow key={a.id} article={a} lang={lang} />
           ))}
@@ -143,7 +127,37 @@ export function ArticleFeed({ articles }: { articles: Article[] }) {
   );
 }
 
-function ToggleButton({
+function Segment({
+  active,
+  onClick,
+  label,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      aria-label={label}
+      title={label}
+      className={cn(
+        "rounded px-2.5 py-1 uppercase tracking-[0.1em] transition-colors",
+        active
+          ? "bg-[var(--marker)] text-[var(--background)]"
+          : "text-[var(--muted)] hover:text-[var(--foreground)]",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function IconToggle({
   label,
   active,
   onClick,
@@ -162,9 +176,9 @@ function ToggleButton({
       aria-pressed={active}
       title={label}
       className={cn(
-        "inline-flex items-center justify-center rounded-md p-1.5 transition-colors",
+        "inline-flex items-center justify-center rounded p-1.5 transition-colors",
         active
-          ? "bg-[var(--accent)]/20 text-[var(--accent)]"
+          ? "bg-[var(--marker)] text-[var(--background)]"
           : "text-[var(--muted)] hover:text-[var(--foreground)]",
       )}
     >
