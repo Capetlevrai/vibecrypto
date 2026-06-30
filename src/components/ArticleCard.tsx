@@ -48,7 +48,7 @@ export function ArticleCard({ article, lang }: { article: Article; lang: Lang })
           </span>
         </div>
 
-        <h3 title={displayTitle} className="min-h-[3.75rem] text-[17px] font-semibold leading-snug tracking-tight">
+        <h3 title={displayTitle} className="min-h-[4rem] text-lg font-semibold leading-snug tracking-tight">
           <Link href={`/item/${article.id}`} className="line-clamp-3 transition-colors hover:text-[var(--accent)]">
             {displayTitle}
           </Link>
