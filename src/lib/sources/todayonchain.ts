@@ -4,6 +4,22 @@ import type { RawArticle, SourceAdapter } from "./types";
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
 
+async function fetchFinalUrl(url: string): Promise<string | undefined> {
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": UA, Accept: "text/html" },
+      cache: "no-store",
+    });
+    if (!res.ok) return undefined;
+    const html = await res.text();
+    const $ = cheerio.load(html);
+    const href = $(".visit-site-btn-sm a").first().attr("href")?.trim();
+    return href ? new URL(href, url).toString() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export const todayonchain: SourceAdapter = {
   source: "todayonchain",
   label: "TodayOnChain",
@@ -15,7 +31,14 @@ export const todayonchain: SourceAdapter = {
     if (!res.ok) throw new Error(`todayonchain HTTP ${res.status}`);
     const html = await res.text();
     const $ = cheerio.load(html);
-    const out: RawArticle[] = [];
+    const cards: {
+      title: string;
+      url: string;
+      imageUrl?: string;
+      excerpt: string;
+      publishedAt?: number;
+      sourceName: string;
+    }[] = [];
 
     $(".api_article").each((_, el) => {
       const $card = $(el);
@@ -32,18 +55,26 @@ export const todayonchain: SourceAdapter = {
       const anchor = $card.closest("a").attr("href");
       let href = anchor ?? (id ? `/news/article/${id}/` : "");
       if (href && !href.startsWith("http")) href = `https://www.todayonchain.com${href}`;
-      out.push({
+      cards.push({
         title,
         url: href,
         imageUrl: imgSrc || undefined,
         excerpt: excerpt.slice(0, 600),
-        rawContent: `${title}. ${excerpt}`.slice(0, 6000),
         publishedAt: dt ? Date.parse(dt) : undefined,
-        source: "todayonchain",
         sourceName: sourceName || "TodayOnChain",
       });
     });
 
-    return out;
+    return Promise.all(cards.map(async (card): Promise<RawArticle> => ({
+      title: card.title,
+      url: card.url,
+      finalUrl: await fetchFinalUrl(card.url),
+      imageUrl: card.imageUrl,
+      excerpt: card.excerpt,
+      rawContent: `${card.title}. ${card.excerpt}`.slice(0, 6000),
+      publishedAt: card.publishedAt,
+      source: "todayonchain",
+      sourceName: card.sourceName,
+    })));
   },
 };

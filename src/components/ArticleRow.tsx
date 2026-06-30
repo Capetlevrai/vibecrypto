@@ -23,6 +23,7 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
   const fr = lang === "fr";
   const displayTitle = fr ? article.titleFr ?? article.title : article.title;
   const blurb = fr ? article.summary ?? article.excerpt : article.excerpt;
+  const sourceHref = article.finalUrl ?? article.url;
   const hasTags = article.assets.length > 0 || article.exchanges.length > 0;
 
   return (
@@ -106,7 +107,7 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
               </div>
             )}
             <a
-              href={article.url}
+              href={sourceHref}
               target="_blank"
               rel="noopener noreferrer"
               className="font-mono text-[11px] uppercase tracking-wide text-[var(--foreground)]/70 transition-colors hover:text-[var(--marker)]"

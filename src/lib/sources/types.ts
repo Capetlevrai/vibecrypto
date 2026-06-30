@@ -3,6 +3,7 @@ import type { Source } from "@/lib/types";
 export interface RawArticle {
   title: string;
   url: string;
+  finalUrl?: string;
   imageUrl?: string;
   excerpt?: string;
   rawContent?: string;

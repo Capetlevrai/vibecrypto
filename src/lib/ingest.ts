@@ -47,6 +47,7 @@ export async function runIngest(opts: { only?: string[] } = {}): Promise<IngestR
   let total = 0;
   let inserted = 0;
   const toInsert: (typeof articles.$inferInsert)[] = [];
+  const finalUrlUpdates: { urlHash: string; finalUrl: string }[] = [];
   const heliusImageUpdates: { urlHash: string; imageUrl: string }[] = [];
 
   adapters.forEach((adapter, i) => {
@@ -65,6 +66,9 @@ export async function runIngest(opts: { only?: string[] } = {}): Promise<IngestR
     for (const r of list) {
       const { assets, exchanges } = tagText(r.title, r.excerpt, r.rawContent);
       const hash = urlHash(r.url);
+      if (r.finalUrl) {
+        finalUrlUpdates.push({ urlHash: hash, finalUrl: r.finalUrl.slice(0, 1000) });
+      }
       if (r.source === "helius" && r.imageUrl) {
         heliusImageUpdates.push({ urlHash: hash, imageUrl: r.imageUrl.slice(0, 1000) });
       }
@@ -77,6 +81,7 @@ export async function runIngest(opts: { only?: string[] } = {}): Promise<IngestR
         summaryModel: null,
         summaryAt: null,
         url: r.url,
+        finalUrl: r.finalUrl?.slice(0, 1000) ?? null,
         imageUrl: r.imageUrl?.slice(0, 1000) ?? null,
         urlHash: hash,
         source: r.source,
@@ -104,6 +109,13 @@ export async function runIngest(opts: { only?: string[] } = {}): Promise<IngestR
       const bucket = perSource[row.source];
       if (bucket) bucket.inserted += 1;
     }
+  }
+
+  for (const update of finalUrlUpdates) {
+    await db
+      .update(articles)
+      .set({ finalUrl: update.finalUrl })
+      .where(eq(articles.urlHash, update.urlHash));
   }
 
   for (const update of heliusImageUpdates) {

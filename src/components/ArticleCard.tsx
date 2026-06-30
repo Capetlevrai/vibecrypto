@@ -21,6 +21,7 @@ export function ArticleCard({ article, lang }: { article: Article; lang: Lang })
   const sourceColor = SOURCE_COLORS[article.source];
   const fr = lang === "fr";
   const displayTitle = fr ? article.titleFr ?? article.title : article.title;
+  const sourceHref = article.finalUrl ?? article.url;
   const paragraphs = fr && article.summary ? article.summary.split(/\n\n+/) : null;
 
   return (
@@ -101,7 +102,7 @@ export function ArticleCard({ article, lang }: { article: Article; lang: Lang })
 
         <div className="mt-auto flex items-center gap-2 border-t border-[var(--border)]/60 pt-3">
           <a
-            href={article.url}
+            href={sourceHref}
             target="_blank"
             rel="noopener noreferrer"
             className="font-mono text-[11px] uppercase tracking-wide text-[var(--foreground)]/70 transition-colors hover:text-[var(--marker)]"
