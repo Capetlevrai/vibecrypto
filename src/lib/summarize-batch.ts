@@ -53,7 +53,7 @@ export async function summarizePending(): Promise<BatchSummaryResult> {
     })
     .from(articles)
     .where(or(isNull(articles.summary), isNull(articles.titleFr)))
-    .orderBy(desc(articles.score), desc(articles.publishedAt))
+    .orderBy(desc(articles.publishedAt), desc(articles.score))
     .limit(cfg.max);
 
   if (pending.length === 0) {
