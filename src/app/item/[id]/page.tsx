@@ -13,7 +13,7 @@ export default async function ItemPage(props: PageProps<"/item/[id]">) {
   const article = await getArticle(id);
   if (!article) notFound();
   const sourceHref = article.finalUrl ?? article.url;
-  const showAggregatorLink = article.source === "todayonchain" && article.finalUrl;
+  const showAggregatorLink = article.source === "todayonchain" && Boolean(article.finalUrl);
 
   return (
     <main className="cv-fade-in mx-auto w-full max-w-6xl flex-1 px-4 py-6">
@@ -66,21 +66,6 @@ export default async function ItemPage(props: PageProps<"/item/[id]">) {
                 >
                   {article.url}
                 </a>
-              </dd>
-            </div>
-          )}
-          {!showAggregatorLink && (
-            <div className="grid grid-cols-[7rem_1fr] gap-2">
-              <dt className="font-mono text-[11px] uppercase tracking-wide text-[var(--muted)]">Lien direct</dt>
-              <dd>
-            <a
-              href={article.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="break-all text-[var(--accent-2)] hover:underline"
-            >
-              {article.url}
-            </a>
               </dd>
             </div>
           )}
