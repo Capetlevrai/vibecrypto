@@ -19,7 +19,14 @@ function authorized(req: NextRequest): AuthResult {
   }
   const fromQuery = req.nextUrl.searchParams.get("secret");
   const fromHeader = req.headers.get("x-cron-secret");
-  if (fromQuery === secret || fromHeader === secret) return { ok: true };
+  const fromAuthorization = req.headers.get("authorization");
+  if (
+    fromQuery === secret ||
+    fromHeader === secret ||
+    fromAuthorization === `Bearer ${secret}`
+  ) {
+    return { ok: true };
+  }
   return { ok: false, status: 401, error: "unauthorized" };
 }
 

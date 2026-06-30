@@ -2,18 +2,31 @@ name: refresh
 
 on:
   schedule:
-    # toutes les 15 minutes (les cron GitHub peuvent avoir quelques minutes de retard)
-    - cron: "*/15 * * * *"
+    # toutes les 15 minutes, décalé pour éviter les minutes GitHub les plus saturées
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
+
+concurrency:
+  group: refresh-prod
+  cancel-in-progress: false
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 8
     steps:
       - name: Trigger ingest endpoint
         run: |
           set -e
+          if [ -z "${{ secrets.REFRESH_URL }}" ] || [ -z "${{ secrets.CRON_SECRET }}" ]; then
+            echo "REFRESH_URL ou CRON_SECRET manquant"
+            exit 1
+          fi
           code=$(curl -s -o /tmp/body -w "%{http_code}" \
+            --retry 2 \
+            --retry-delay 10 \
+            --connect-timeout 20 \
+            --max-time 360 \
             -X POST \
             -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
             "${{ secrets.REFRESH_URL }}")
