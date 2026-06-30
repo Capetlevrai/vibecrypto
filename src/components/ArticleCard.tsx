@@ -25,6 +25,7 @@ export function ArticleCard({ article }: { article: Article }) {
             src={article.imageUrl}
             alt={displayTitle}
             loading="lazy"
+            referrerPolicy="no-referrer"
             className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             onError={() => setImgError(true)}
           />
