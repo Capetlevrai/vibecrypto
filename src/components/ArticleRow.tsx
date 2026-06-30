@@ -44,7 +44,7 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
 
       <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-start sm:gap-5">
         <div className="order-2 flex min-w-0 flex-1 flex-col gap-1.5 sm:order-1 sm:max-w-[34rem]">
-          <h3 title={displayTitle} className="text-[15px] font-semibold leading-snug tracking-tight sm:text-base">
+          <h3 title={displayTitle} className="text-base font-semibold leading-snug tracking-tight sm:text-[17px]">
             <Link
               href={`/item/${article.id}`}
               className="line-clamp-2 transition-colors hover:text-[var(--accent)]"
