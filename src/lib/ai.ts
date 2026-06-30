@@ -143,10 +143,7 @@ export async function summarizeArticle(opts: {
   try {
     parsed = summarySchema.parse(extractJson(text));
   } catch {
-    // Repli: pas de JSON exploitable -> on utilise le texte brut comme resume.
-    const fallback = text.trim().slice(0, 800);
-    if (!fallback) throw new Error("Réponse IA vide");
-    parsed = { titleFr: opts.title.slice(0, 160), hook: opts.title.slice(0, 220), summary: fallback };
+    throw new Error("Réponse IA JSON invalide");
   }
 
   return {
