@@ -12,7 +12,6 @@ export function ArticleCard({ article, lang }: { article: Article; lang: Lang })
 
   const sourceColor = SOURCE_COLORS[article.source];
   const fr = lang === "fr";
-  const translated = fr && Boolean(article.titleFr);
   const displayTitle = fr ? article.titleFr ?? article.title : article.title;
   const paragraphs = fr && article.summary ? article.summary.split(/\n\n+/) : null;
 
@@ -92,12 +91,7 @@ export function ArticleCard({ article, lang }: { article: Article; lang: Lang })
           </div>
         )}
 
-        <div className="mt-auto flex flex-col gap-2 border-t border-[var(--border)]/60 pt-3">
-          {translated && (
-            <p className="text-[11px] leading-snug text-[var(--muted)]/70" title={article.title}>
-              <span className="font-medium">VO·</span> {article.title}
-            </p>
-          )}
+        <div className="mt-auto flex items-center gap-2 border-t border-[var(--border)]/60 pt-3">
           <a
             href={article.url}
             target="_blank"

@@ -13,7 +13,6 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
   const sourceColor = SOURCE_COLORS[article.source];
   const sourceName = article.sourceName ?? SOURCE_LABELS[article.source];
   const fr = lang === "fr";
-  const translated = fr && Boolean(article.titleFr);
   const displayTitle = fr ? article.titleFr ?? article.title : article.title;
   const blurb = fr ? article.summary ?? article.excerpt : article.excerpt;
   const hasTags = article.assets.length > 0 || article.exchanges.length > 0;
@@ -56,11 +55,6 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
           {blurb && (
             <p className="line-clamp-2 max-w-2xl text-xs leading-relaxed text-[var(--muted)]">
               {blurb}
-            </p>
-          )}
-          {translated && (
-            <p className="max-w-2xl truncate text-[11px] text-[var(--muted)]/60" title={article.title}>
-              <span className="font-medium">VO·</span> {article.title}
             </p>
           )}
         </div>
