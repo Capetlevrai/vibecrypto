@@ -8,7 +8,6 @@ import type { ModelDef } from "@/lib/ai";
 import { ASSET_LABELS, EXCHANGE_LABELS, SOURCE_COLORS, SOURCE_LABELS } from "@/lib/types";
 import { formatHour, timeAgo } from "@/lib/fmt";
 import { cn } from "@/lib/cn";
-import { useLanguage } from "./LanguageProvider";
 
 export function ArticleCard({
   article,
@@ -18,13 +17,11 @@ export function ArticleCard({
   models: Pick<ModelDef, "id" | "label">[];
 }) {
   const router = useRouter();
-  const { translate } = useLanguage();
   const [pending, startTransition] = useTransition();
   const [model, setModel] = useState(models[0]?.id ?? "");
   const [error, setError] = useState<string | null>(null);
   const [imgError, setImgError] = useState(false);
-
-  const translated = translate(article.id, { title: article.title, hook: article.hook });
+  const [showOriginal, setShowOriginal] = useState(false);
 
   function summarize() {
     setError(null);
@@ -53,7 +50,7 @@ export function ArticleCard({
         <div className="relative -mx-4 -mt-4 mb-1 h-32 overflow-hidden bg-[var(--background)]">
           <img
             src={article.imageUrl}
-            alt={translated.title}
+            alt={article.title}
             loading="lazy"
             className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
             onError={() => setImgError(true)}
@@ -79,17 +76,17 @@ export function ArticleCard({
 
       <h3 className="text-base font-semibold leading-snug">
         <Link href={`/item/${article.id}`} className="hover:text-[var(--accent)]">
-          {translated.title}
+          {article.title}
         </Link>
       </h3>
 
-      {translated.hook && (
+      {article.hook && !showOriginal && (
         <p className="border-l-2 border-[var(--accent)]/60 pl-2 text-sm italic text-[var(--foreground)]/90">
-          {translated.hook}
+          {article.hook}
         </p>
       )}
 
-      {hasSummary ? (
+      {hasSummary && !showOriginal ? (
         <div className="space-y-2 text-sm text-[var(--foreground)]/80">
           {article.summary!.split(/\n\n+/).map((p, i) => (
             <p key={i}>{p}</p>
@@ -97,8 +94,19 @@ export function ArticleCard({
         </div>
       ) : (
         article.excerpt && (
-          <p className="line-clamp-3 text-sm text-[var(--muted)]">{article.excerpt}</p>
+          <p className={cn("text-sm text-[var(--muted)]", !showOriginal && "line-clamp-3")}>
+            {article.excerpt}
+          </p>
         )
+      )}
+
+      {hasSummary && article.excerpt && (
+        <button
+          onClick={() => setShowOriginal((v) => !v)}
+          className="self-start text-[11px] font-medium text-[var(--muted)] hover:text-[var(--foreground)]"
+        >
+          {showOriginal ? "← Voir le résumé FR" : "Voir l'original →"}
+        </button>
       )}
 
       {(article.assets.length > 0 || article.exchanges.length > 0) && (

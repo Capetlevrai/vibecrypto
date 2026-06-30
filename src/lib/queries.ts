@@ -1,6 +1,6 @@
 import { db } from "./db/client";
 import { articles } from "./db/schema";
-import { and, desc, inArray, like, or, sql, eq } from "drizzle-orm";
+import { and, count, desc, inArray, isNotNull, like, or, eq } from "drizzle-orm";
 import type { Article } from "./types";
 
 export interface Filters {
@@ -43,7 +43,7 @@ export async function getArticles(f: Filters = {}): Promise<Article[]> {
     const s = `%${f.search.trim()}%`;
     conds.push(or(like(articles.title, s), like(articles.summary, s), like(articles.excerpt, s)));
   }
-  if (f.hasSummary) conds.push(sql`${articles.summary} IS NOT NULL`);
+  if (f.hasSummary) conds.push(isNotNull(articles.summary));
 
   const rows = await db
     .select()
@@ -61,9 +61,14 @@ export async function getArticle(id: string): Promise<Article | null> {
 }
 
 export async function getArticleCounts(): Promise<{ total: number; withSummary: number }> {
-  const all = await db.select({ s: articles.summary, src: articles.source }).from(articles);
+  const [row] = await db
+    .select({
+      total: count(),
+      withSummary: count(articles.summary),
+    })
+    .from(articles);
   return {
-    total: all.length,
-    withSummary: all.filter((r) => r.s !== null).length,
+    total: row?.total ?? 0,
+    withSummary: row?.withSummary ?? 0,
   };
 }

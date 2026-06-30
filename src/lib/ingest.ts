@@ -3,6 +3,7 @@ import { db } from "./db/client";
 import { articles, meta } from "./db/schema";
 import { ADAPTERS } from "./sources";
 import { tagText } from "./tagging";
+import { summarizePending, type BatchSummaryResult } from "./summarize-batch";
 import type { RawArticle } from "./sources";
 
 export function normalizeUrl(raw: string): string {
@@ -28,6 +29,7 @@ export interface IngestResult {
   total: number;
   inserted: number;
   perSource: Record<string, { fetched: number; inserted: number; error?: string }>;
+  summary: BatchSummaryResult;
 }
 
 export async function runIngest(opts: { only?: string[] } = {}): Promise<IngestResult> {
@@ -90,16 +92,20 @@ export async function runIngest(opts: { only?: string[] } = {}): Promise<IngestR
       .returning({ id: articles.id, source: articles.source });
     inserted = insertedRows.length;
     for (const row of insertedRows) {
-      perSource[row.source].inserted += 1;
+      const bucket = perSource[row.source];
+      if (bucket) bucket.inserted += 1;
     }
   }
+
+  // Resume FR auto du backlog (articles sans resume), garde-fous dans summarize-batch.
+  const summary = await summarizePending();
 
   await db
     .insert(meta)
     .values({ key: "lastRefresh", value: String(now) })
     .onConflictDoUpdate({ target: meta.key, set: { value: String(now) } });
 
-  return { total, inserted, perSource };
+  return { total, inserted, perSource, summary };
 }
 
 export async function getLastRefresh(): Promise<number | null> {

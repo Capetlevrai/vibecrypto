@@ -2,19 +2,30 @@ import { NextRequest, NextResponse } from "next/server";
 import { runIngest } from "@/lib/ingest";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
-function authorized(req: NextRequest): boolean {
+type AuthResult = { ok: true } | { ok: false; status: number; error: string };
+
+function authorized(req: NextRequest): AuthResult {
   const secret = process.env.CRON_SECRET;
-  if (!secret) return true; // non configuré en dev local
+  if (!secret) {
+    // En production (Vercel), refuser plutot que d'exposer l'endpoint si la
+    // variable a ete oubliee. En dev local, on laisse passer pour le confort.
+    if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+      return { ok: false, status: 500, error: "CRON_SECRET manquant en production" };
+    }
+    return { ok: true };
+  }
   const fromQuery = req.nextUrl.searchParams.get("secret");
   const fromHeader = req.headers.get("x-cron-secret");
-  return fromQuery === secret || fromHeader === secret;
+  if (fromQuery === secret || fromHeader === secret) return { ok: true };
+  return { ok: false, status: 401, error: "unauthorized" };
 }
 
 async function handle(req: NextRequest) {
-  if (!authorized(req)) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const auth = authorized(req);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
   const only = req.nextUrl.searchParams.get("sources");
   try {

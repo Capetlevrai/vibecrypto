@@ -12,6 +12,12 @@ async function main() {
     const err = r.error ? `  ⚠ ${r.error}` : "";
     console.log(`  · ${src}: ${r.inserted}/${r.fetched}${err}`);
   }
+  const s = result.summary;
+  if (s.skippedReason) {
+    console.log(`  · résumé auto: désactivé (${s.skippedReason})`);
+  } else {
+    console.log(`  · résumé auto: ${s.summarized}/${s.candidates} (échecs: ${s.failed})`);
+  }
   process.exit(0);
 }
 

@@ -39,11 +39,13 @@ export const cryptopanic: SourceAdapter = {
       const published =
         (p.published_at as string | undefined) ??
         (p.created_at as string | undefined);
+      const description = typeof p.description === "string" ? p.description.trim() : "";
+      const excerpt = description || title;
       out.push({
         title,
         url: directUrl,
-        excerpt: String(p.slug ?? title),
-        rawContent: `${title}`,
+        excerpt,
+        rawContent: description ? `${title}. ${description}` : title,
         publishedAt: published ? Date.parse(published) : undefined,
         source: "cryptopanic",
         sourceName: source?.title ?? source?.domain ?? "CryptoPanic",

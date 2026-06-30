@@ -1,4 +1,4 @@
-import { generateObject, type LanguageModel } from "ai";
+import { generateText, type LanguageModel } from "ai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
@@ -81,8 +81,8 @@ export function resolveModel(modelId: string | undefined): ModelDef {
 }
 
 const summarySchema = z.object({
-  hook: z.string().max(220),
-  summary: z.string().max(800),
+  hook: z.string().min(1).max(280),
+  summary: z.string().min(1).max(1000),
 });
 
 export interface SummaryResult {
@@ -91,6 +91,17 @@ export interface SummaryResult {
   model: string;
 }
 
+// Extraction tolerante d'un objet JSON depuis une reponse LLM (fences, texte autour).
+function extractJson(text: string): unknown {
+  const cleaned = text.replace(/```(?:json)?/gi, "").trim();
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  const candidate = start !== -1 && end !== -1 ? cleaned.slice(start, end + 1) : cleaned;
+  return JSON.parse(candidate);
+}
+
+// Resume FR via generateText + JSON tolerant (compatible avec les endpoints qui ne
+// supportent pas la sortie structuree, ex: GLM coding plan, DeepSeek).
 export async function summarizeArticle(opts: {
   title: string;
   excerpt?: string | null;
@@ -100,25 +111,39 @@ export async function summarizeArticle(opts: {
   const model = resolveModel(opts.modelId);
   const content = [opts.excerpt, opts.rawContent].filter(Boolean).join("\n\n").slice(0, 8000) || opts.title;
 
-  const { object } = await generateObject({
+  const { text } = await generateText({
     model: getClient(model),
-    schema: summarySchema,
-    schemaName: "cryptoSummary",
     temperature: 0.3,
     system:
-      "Tu es un analyste crypto francophone expérimenté. " +
-      "Tu rédiges pour un créateur de contenu (Twitter, YouTube, Twitch, presse crypto) " +
-      "qui a besoin d'aller à l'essentiel pour préparer des best-of. " +
-      "Style: factuel, percutant, sans hype. En français.",
+      "Tu es un analyste crypto francophone expérimenté qui traduit et synthétise en " +
+      "français toute actualité crypto, quelle que soit sa langue d'origine. " +
+      "Tu rédiges pour un créateur de contenu (Twitter, YouTube, Twitch, presse) qui veut " +
+      "l'essentiel pour préparer des best-of. Français naturel et fluide, sans anglicismes " +
+      "inutiles, factuel et percutant, sans hype. Conserve tels quels les tickers (BTC, ETH, " +
+      "SOL, HYPE, TAO), les noms de protocoles/exchanges (Uniswap, Aave, OKX, Binance, " +
+      "Hyperliquid) et les chiffres. Tu réponds STRICTEMENT en JSON, sans texte autour.",
     prompt:
-      `À partir de l'actualité suivante, produis un objet JSON en français.\n\n` +
+      `À partir de l'actualité suivante, produis un objet JSON.\n\n` +
       `Titre: ${opts.title}\n\n` +
       `Contenu brut:\n${content}\n\n` +
+      `Format de sortie EXACT (JSON valide, rien d'autre):\n` +
+      `{"hook": "...", "summary": "..."}\n\n` +
       `Contraintes:\n` +
-      `- hook: UNE seule phrase d'accroche percutante (max 220 caractères) qui donne envie de cliquer.\n` +
-      `- summary: EXACTEMENT 2 courts paragraphes (séparés par une ligne vide) qui expliquent de quoi ça parle, le contexte et l'enjeu. Max 800 caractères.\n` +
-      `- Reste factuel. Ne date pas ("récemment", "aujourd'hui"). Pas d'invention.`,
+      `- hook: UNE phrase d'accroche percutante en français (max 220 caractères).\n` +
+      `- summary: EXACTEMENT 2 courts paragraphes en français séparés par "\\n\\n" qui ` +
+      `expliquent de quoi ça parle, le contexte et l'enjeu (max 800 caractères).\n` +
+      `- Reste factuel. Ne date pas ("récemment", "aujourd'hui"). Aucune invention.`,
   });
 
-  return { hook: object.hook.trim(), summary: object.summary.trim(), model: model.id };
+  let parsed: { hook: string; summary: string };
+  try {
+    parsed = summarySchema.parse(extractJson(text));
+  } catch {
+    // Repli: pas de JSON exploitable -> on utilise le texte brut comme resume.
+    const fallback = text.trim().slice(0, 800);
+    if (!fallback) throw new Error("Réponse IA vide");
+    parsed = { hook: opts.title.slice(0, 220), summary: fallback };
+  }
+
+  return { hook: parsed.hook.trim(), summary: parsed.summary.trim(), model: model.id };
 }

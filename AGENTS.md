@@ -60,15 +60,19 @@ src/lib/
     index.ts            registre ADAPTERS
   tagging.ts            détection assets/exchanges (regex bornées)
   ai.ts                 registry multi-modèles + summarizeArticle (generateObject)
-  ingest.ts             runIngest() : fetch + tag + dedup + insert idempotent
-  queries.ts            getArticles(filters) / getArticle / counts
+  config.ts             lecture centralisée des flags d'env (résumé auto)
+  ingest.ts             runIngest() : fetch + tag + dedup + insert + résumé auto
+  summarize-batch.ts    résumé FR auto des nouveaux articles (garde-fous)
+  queries.ts            getArticles(filters) / getArticle / counts (count() SQL)
   filters.ts            parseFilters depuis searchParams
 src/app/
   page.tsx              dashboard (server, force-dynamic, lit DB + searchParams)
   item/[id]/page.tsx    détail
   api/cron/refresh/     GET+POST ingestion (protégé par CRON_SECRET)
-  api/summarize/        POST génère/regénère un résumé
+  api/summarize/        POST génère/regénère un résumé (manuel, à la demande)
 src/components/         FilterBar, ArticleCard, RefreshButton (tous 'use client')
+
+Doc détaillée du pipeline : docs/INGESTION.md
 ```
 
 ## Ajouter une source
@@ -83,8 +87,16 @@ src/components/         FilterBar, ArticleCard, RefreshButton (tous 'use client'
 
 Définis dans `src/lib/ai.ts` → `availableModels()` n'expose que les modèles dont la clé
 env est présente. Pour ajouter un provider : ajoute une entrée dans la fonction. Le résumé
-est généré à la demande (bouton "Résumer") puis stocké en base (`summary`, `hook`,
-`summary_model`). Pas de résumé à l'ingestion (coût/latence).
+(en français) est stocké en base (`summary`, `hook`, `summary_model`, `summary_at`).
+
+Deux déclencheurs :
+- **Auto à l'ingestion** : `summarizeNewArticles()` résume les nouveaux articles avec
+  garde-fous (plafond `AUTO_SUMMARIZE_MAX`, concurrence, priorité au `score`,
+  désactivable via `AUTO_SUMMARIZE=0`). Voir `docs/INGESTION.md`.
+- **Manuel** : bouton "Re-résumer" par carte → `POST /api/summarize` (choix du modèle).
+
+Le texte original (`title`, `excerpt`, `raw_content`) est conservé ; la carte propose un
+toggle "Voir l'original". Pas de système de traduction multi-langue (le résumé EST en FR).
 
 ## Conventions de code
 
@@ -103,6 +115,11 @@ est généré à la demande (bouton "Résumer") puis stocké en base (`summary`,
 
 1. Crée une DB Turso, mets `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN` dans Vercel.
 2. `npm run db:push` après chaque changement de schéma (ou via un script build).
-3. Cron : Vercel Hobby est limité → le workflow `.github/workflows/refresh.yml`
-   appelle `/api/cron/refresh` toutes les 15 min gratuitement.
-4. Renseigne les clés IA voulues ; seuls les modèles avec clé apparaissent dans l'UI.
+3. **`CRON_SECRET` est obligatoire en prod** : `/api/cron/refresh` refuse (500) si la
+   variable est absente sur Vercel. Mets le même secret côté GitHub Actions.
+4. Cron : Vercel Hobby est limité (cron quotidien) → le workflow
+   `.github/workflows/refresh.yml` appelle `/api/cron/refresh` toutes les 15 min
+   gratuitement. Secrets GitHub requis : `REFRESH_URL` (= URL de l'endpoint) + `CRON_SECRET`.
+5. Renseigne les clés IA voulues ; seuls les modèles avec clé apparaissent dans l'UI.
+   Le résumé FR auto tourne à l'ingestion (cf. `AUTO_SUMMARIZE*`, voir `docs/INGESTION.md`).
+   `/api/cron/refresh` a `maxDuration = 300` pour laisser le temps aux résumés.
