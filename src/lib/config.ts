@@ -19,7 +19,7 @@ export function autoSummaryConfig(): AutoSummaryConfig {
   return {
     enabled: bool(process.env.AUTO_SUMMARIZE, true),
     max: int(process.env.AUTO_SUMMARIZE_MAX, 12),
-    concurrency: Math.max(1, int(process.env.AUTO_SUMMARIZE_CONCURRENCY, 3)),
+    concurrency: Math.max(1, int(process.env.AUTO_SUMMARIZE_CONCURRENCY, 2)),
     modelId: process.env.AUTO_SUMMARIZE_MODEL || undefined,
   };
 }

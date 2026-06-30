@@ -49,6 +49,12 @@ export const SOURCES = [
   "todayonchain",
   "asksurf",
   "cryptopanic",
+  "protos",
+  "bankless",
+  "helius",
+  "taomedia",
+  "taodaily",
+  "hyperliquidr",
 ] as const;
 export type Source = (typeof SOURCES)[number];
 
@@ -57,6 +63,12 @@ export const SOURCE_LABELS: Record<Source, string> = {
   todayonchain: "TodayOnChain",
   asksurf: "AskSurf Pulse",
   cryptopanic: "CryptoPanic",
+  protos: "Protos",
+  bankless: "Bankless",
+  helius: "Helius",
+  taomedia: "TAO Media",
+  taodaily: "TAO Daily",
+  hyperliquidr: "HyperliquidR",
 };
 
 export const SOURCE_COLORS: Record<Source, string> = {
@@ -64,6 +76,12 @@ export const SOURCE_COLORS: Record<Source, string> = {
   todayonchain: "#6f7cff",
   asksurf: "#22d3ee",
   cryptopanic: "#a855f7",
+  protos: "#ff4d4d",
+  bankless: "#3b82f6",
+  helius: "#e84142",
+  taomedia: "#14b8a6",
+  taodaily: "#10b981",
+  hyperliquidr: "#50d2c1",
 };
 
 export interface Article {

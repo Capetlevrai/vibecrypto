@@ -62,27 +62,34 @@ export async function summarizePending(): Promise<BatchSummaryResult> {
   let summarized = 0;
   let failed = 0;
 
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
   await runWithConcurrency(pending, cfg.concurrency, async (row) => {
-    try {
-      const result = await summarizeArticle({
-        title: row.title,
-        excerpt: row.excerpt,
-        rawContent: row.rawContent,
-        modelId: cfg.modelId,
-      });
-      await db
-        .update(articles)
-        .set({
-          hook: result.hook,
-          summary: result.summary,
-          summaryModel: result.model,
-          summaryAt: Date.now(),
-        })
-        .where(eq(articles.id, row.id));
-      summarized += 1;
-    } catch {
-      failed += 1;
+    // Jusqu'a 3 tentatives avec backoff: encaisse les rate-limits (429) transitoires.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const result = await summarizeArticle({
+          title: row.title,
+          excerpt: row.excerpt,
+          rawContent: row.rawContent,
+          modelId: cfg.modelId,
+        });
+        await db
+          .update(articles)
+          .set({
+            hook: result.hook,
+            summary: result.summary,
+            summaryModel: result.model,
+            summaryAt: Date.now(),
+          })
+          .where(eq(articles.id, row.id));
+        summarized += 1;
+        return;
+      } catch {
+        if (attempt < 2) await sleep(1500 * (attempt + 1));
+      }
     }
+    failed += 1;
   });
 
   return { candidates: pending.length, summarized, failed };
