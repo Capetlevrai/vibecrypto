@@ -14,6 +14,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-border: var(--border);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
@@ -44,8 +45,28 @@ body {
   background: rgba(247, 147, 26, 0.3);
 }
 
-/* Scrollbar discrète */
 * {
   scrollbar-width: thin;
   scrollbar-color: #2a2e42 transparent;
+}
+
+:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--accent) 70%, transparent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@keyframes cv-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cv-fade-in {
+  animation: cv-fade-in 0.4s ease both;
 }

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/ArticleCard";
 import { getArticle } from "@/lib/queries";
-import { availableModels } from "@/lib/ai";
 import { formatDateTime } from "@/lib/fmt";
 import { SOURCE_LABELS } from "@/lib/types";
 
@@ -12,18 +11,17 @@ export default async function ItemPage(props: PageProps<"/item/[id]">) {
   const { id } = await props.params;
   const article = await getArticle(id);
   if (!article) notFound();
-  const models = availableModels().map((m) => ({ id: m.id, label: m.label }));
 
   return (
-    <main className="mx-auto max-w-3xl flex-1 px-4 py-6">
+    <main className="cv-fade-in mx-auto max-w-3xl flex-1 px-4 py-6">
       <Link
         href="/"
-        className="mb-4 inline-block text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
+        className="mb-4 inline-block text-sm text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
       >
         ← Retour au fil
       </Link>
 
-      <ArticleCard article={article} models={models} />
+      <ArticleCard article={article} />
 
       <section className="mt-6 rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-5">
         <h2 className="mb-2 text-sm font-semibold text-[var(--muted)]">Détails</h2>

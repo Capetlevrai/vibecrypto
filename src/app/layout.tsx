@@ -28,7 +28,12 @@ export default function RootLayout({
       lang="fr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <footer className="border-t border-[var(--border)]/60 px-4 py-5 text-center text-xs text-[var(--muted)]">
+          Vibe<span className="text-[var(--accent)]">Crypto</span> · veille crypto multi-sources
+        </footer>
+      </body>
     </html>
   );
 }

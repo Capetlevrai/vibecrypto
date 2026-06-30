@@ -31,9 +31,10 @@ export function RefreshButton() {
       <button
         onClick={refresh}
         disabled={pending}
-        className="rounded-lg bg-[var(--accent)] px-3 py-1.5 text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent)] px-3.5 py-1.5 text-sm font-semibold text-black shadow-lg shadow-[var(--accent)]/20 transition hover:brightness-110 disabled:opacity-50"
       >
-        {pending ? "Rafraîchissement…" : "↻ Actualiser"}
+        <span className={pending ? "inline-block animate-spin" : "inline-block"}>↻</span>
+        {pending ? "Rafraîchissement…" : "Actualiser"}
       </button>
       {msg && <span className="text-xs text-[var(--muted)]">{msg}</span>}
     </div>

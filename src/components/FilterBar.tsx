@@ -54,8 +54,8 @@ export function FilterBar({ total }: { total: number }) {
     0;
 
   return (
-    <div className="sticky top-0 z-20 -mx-4 mb-6 border-b border-[var(--border)] bg-[var(--background)]/85 px-4 py-3 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl flex-col gap-2">
+    <div className="sticky top-0 z-20 -mx-4 mb-6 border-b border-[var(--border)] bg-[var(--background)]/80 px-4 py-3 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl flex-col gap-2.5">
         <FilterGroup label="Assets">
           {ASSETS.map((a) => (
             <Chip
@@ -103,7 +103,7 @@ export function FilterBar({ total }: { total: number }) {
             onKeyDown={(e) => {
               if (e.key === "Enter") setSearch((e.target as HTMLInputElement).value);
             }}
-            className="min-w-[200px] flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm outline-none placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
+            className="min-w-[200px] flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm outline-none transition-colors placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
           />
           <Chip active={sp.get("summary") === "1"} onClick={toggleSummary} tone="accent">
             Avec résumé
@@ -159,8 +159,9 @@ function Chip({
   return (
     <button
       onClick={onClick}
+      aria-pressed={active}
       className={cn(
-        "rounded-full border px-2.5 py-1 text-xs transition",
+        "rounded-full border px-2.5 py-1 text-xs font-medium transition duration-150 hover:-translate-y-px",
         active
           ? tones[tone]
           : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--foreground)]/40 hover:text-[var(--foreground)]",
