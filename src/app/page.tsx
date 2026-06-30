@@ -1,19 +1,11 @@
 import { ArticleFeed } from "@/components/ArticleFeed";
+import { LastRefreshIndicator } from "@/components/LastRefreshIndicator";
 import { RefreshButton } from "@/components/RefreshButton";
 import { getArticles } from "@/lib/queries";
 import { getLastRefresh } from "@/lib/ingest";
-import { timeAgo } from "@/lib/fmt";
 
 export const dynamic = "force-dynamic";
 export const preferredRegion = "cdg1";
-
-function shortAgo(ms: number | null | undefined) {
-  return timeAgo(ms)
-    .replace(/ secondes?$/, "s")
-    .replace(/ minutes?$/, " min")
-    .replace(/ heures?$/, "h")
-    .replace(/ jours?$/, "j");
-}
 
 export default async function Page() {
   const [items, lastRefresh] = await Promise.all([
@@ -28,11 +20,7 @@ export default async function Page() {
           Vibe<span className="mark">Crypto</span>
         </h1>
         <div className="flex items-center gap-3">
-          {lastRefresh && (
-            <span className="hidden font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--muted)] sm:inline">
-              maj {shortAgo(lastRefresh)}
-            </span>
-          )}
+          <LastRefreshIndicator initialLastRefresh={lastRefresh} />
           <RefreshButton />
         </div>
       </header>
