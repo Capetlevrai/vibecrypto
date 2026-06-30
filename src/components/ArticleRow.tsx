@@ -43,7 +43,7 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
       </Link>
 
       <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-start sm:gap-5">
-        <div className="order-2 flex min-w-0 flex-1 flex-col gap-1.5 sm:order-1">
+        <div className="order-2 flex min-w-0 flex-1 flex-col gap-1.5 sm:order-1 sm:max-w-[34rem]">
           <h3 title={displayTitle} className="text-[15px] font-semibold leading-snug tracking-tight sm:text-base">
             <Link
               href={`/item/${article.id}`}
@@ -53,7 +53,7 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
             </Link>
           </h3>
           {blurb && (
-            <p className="line-clamp-2 max-w-2xl text-xs leading-relaxed text-[var(--muted)]">
+            <p className="line-clamp-2 text-xs leading-relaxed text-[var(--muted)]">
               {blurb}
             </p>
           )}
