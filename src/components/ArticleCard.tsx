@@ -13,6 +13,7 @@ export function ArticleCard({ article }: { article: Article }) {
 
   const sourceColor = SOURCE_COLORS[article.source];
   const hasSummary = Boolean(article.summary);
+  const displayTitle = showOriginal ? article.title : article.titleFr ?? article.title;
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]/70 backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:border-[var(--accent)]/40 hover:bg-[var(--surface)] hover:shadow-xl hover:shadow-black/40">
@@ -22,7 +23,7 @@ export function ArticleCard({ article }: { article: Article }) {
         <div className="relative h-36 overflow-hidden bg-[var(--background)]">
           <img
             src={article.imageUrl}
-            alt={article.title}
+            alt={displayTitle}
             loading="lazy"
             className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             onError={() => setImgError(true)}
@@ -52,14 +53,14 @@ export function ArticleCard({ article }: { article: Article }) {
         </div>
 
         <h3
-          title={article.title}
+          title={displayTitle}
           className="min-h-[3.75rem] text-base font-semibold leading-snug tracking-tight"
         >
           <Link
             href={`/item/${article.id}`}
             className="line-clamp-3 transition-colors hover:text-[var(--accent)]"
           >
-            {article.title}
+            {displayTitle}
           </Link>
         </h3>
 

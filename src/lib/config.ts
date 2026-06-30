@@ -15,6 +15,11 @@ export interface AutoSummaryConfig {
   modelId: string | undefined;
 }
 
+// Nb max d'articles conserves par source et par run (0 = illimite).
+export function perSourceMax(): number {
+  return int(process.env.INGEST_PER_SOURCE_MAX, 40);
+}
+
 export function autoSummaryConfig(): AutoSummaryConfig {
   return {
     enabled: bool(process.env.AUTO_SUMMARIZE, true),

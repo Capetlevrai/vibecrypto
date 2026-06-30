@@ -31,6 +31,7 @@ export async function POST(req: Request) {
     await db
       .update(articles)
       .set({
+        titleFr: result.titleFr,
         hook: result.hook,
         summary: result.summary,
         summaryModel: result.model,

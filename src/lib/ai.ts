@@ -81,11 +81,13 @@ export function resolveModel(modelId: string | undefined): ModelDef {
 }
 
 const summarySchema = z.object({
+  titleFr: z.string().min(1).max(300),
   hook: z.string().min(1).max(280),
   summary: z.string().min(1).max(1000),
 });
 
 export interface SummaryResult {
+  titleFr: string;
   hook: string;
   summary: string;
   model: string;
@@ -127,23 +129,30 @@ export async function summarizeArticle(opts: {
       `Titre: ${opts.title}\n\n` +
       `Contenu brut:\n${content}\n\n` +
       `Format de sortie EXACT (JSON valide, rien d'autre):\n` +
-      `{"hook": "...", "summary": "..."}\n\n` +
+      `{"titleFr": "...", "hook": "...", "summary": "..."}\n\n` +
       `Contraintes:\n` +
+      `- titleFr: le TITRE traduit en français, naturel et fidèle (max 160 caractères). ` +
+      `Si le titre est déjà en français, garde-le tel quel.\n` +
       `- hook: UNE phrase d'accroche percutante en français (max 220 caractères).\n` +
       `- summary: EXACTEMENT 2 courts paragraphes en français séparés par "\\n\\n" qui ` +
       `expliquent de quoi ça parle, le contexte et l'enjeu (max 800 caractères).\n` +
       `- Reste factuel. Ne date pas ("récemment", "aujourd'hui"). Aucune invention.`,
   });
 
-  let parsed: { hook: string; summary: string };
+  let parsed: { titleFr: string; hook: string; summary: string };
   try {
     parsed = summarySchema.parse(extractJson(text));
   } catch {
     // Repli: pas de JSON exploitable -> on utilise le texte brut comme resume.
     const fallback = text.trim().slice(0, 800);
     if (!fallback) throw new Error("Réponse IA vide");
-    parsed = { hook: opts.title.slice(0, 220), summary: fallback };
+    parsed = { titleFr: opts.title.slice(0, 160), hook: opts.title.slice(0, 220), summary: fallback };
   }
 
-  return { hook: parsed.hook.trim(), summary: parsed.summary.trim(), model: model.id };
+  return {
+    titleFr: parsed.titleFr.trim(),
+    hook: parsed.hook.trim(),
+    summary: parsed.summary.trim(),
+    model: model.id,
+  };
 }

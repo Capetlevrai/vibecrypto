@@ -16,6 +16,7 @@ function mapRow(r: typeof articles.$inferSelect): Article {
   return {
     id: r.id,
     title: r.title,
+    titleFr: r.titleFr,
     hook: r.hook,
     excerpt: r.excerpt,
     summary: r.summary,

@@ -5,6 +5,7 @@ export const articles = sqliteTable(
   {
     id: text("id").primaryKey(),
     title: text("title").notNull(),
+    titleFr: text("title_fr"),
     hook: text("hook"),
     excerpt: text("excerpt"),
     summary: text("summary"),

@@ -4,6 +4,7 @@ import { articles, meta } from "./db/schema";
 import { ADAPTERS } from "./sources";
 import { tagText } from "./tagging";
 import { summarizePending, type BatchSummaryResult } from "./summarize-batch";
+import { perSourceMax } from "./config";
 import type { RawArticle } from "./sources";
 
 export function normalizeUrl(raw: string): string {
@@ -55,7 +56,8 @@ export async function runIngest(opts: { only?: string[] } = {}): Promise<IngestR
       };
       return;
     }
-    const list: RawArticle[] = res.value;
+    const cap = perSourceMax();
+    const list: RawArticle[] = cap > 0 ? res.value.slice(0, cap) : res.value;
     perSource[adapter.source] = { fetched: list.length, inserted: 0 };
     for (const r of list) {
       const { assets, exchanges } = tagText(r.title, r.excerpt, r.rawContent);

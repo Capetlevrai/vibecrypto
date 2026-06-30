@@ -1,6 +1,6 @@
 import { db } from "./db/client";
 import { articles } from "./db/schema";
-import { eq, isNull, desc } from "drizzle-orm";
+import { eq, isNull, or, desc } from "drizzle-orm";
 import { summarizeArticle, availableModels } from "./ai";
 import { autoSummaryConfig } from "./config";
 
@@ -51,7 +51,7 @@ export async function summarizePending(): Promise<BatchSummaryResult> {
       rawContent: articles.rawContent,
     })
     .from(articles)
-    .where(isNull(articles.summary))
+    .where(or(isNull(articles.summary), isNull(articles.titleFr)))
     .orderBy(desc(articles.score), desc(articles.publishedAt))
     .limit(cfg.max);
 
@@ -77,6 +77,7 @@ export async function summarizePending(): Promise<BatchSummaryResult> {
         await db
           .update(articles)
           .set({
+            titleFr: result.titleFr,
             hook: result.hook,
             summary: result.summary,
             summaryModel: result.model,

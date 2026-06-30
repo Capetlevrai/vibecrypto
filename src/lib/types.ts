@@ -87,6 +87,7 @@ export const SOURCE_COLORS: Record<Source, string> = {
 export interface Article {
   id: string;
   title: string;
+  titleFr: string | null;
   hook: string | null;
   excerpt: string | null;
   summary: string | null;
