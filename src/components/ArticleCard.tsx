@@ -64,19 +64,19 @@ export function ArticleCard({ article, lang }: { article: Article; lang: Lang })
         </h3>
 
         {fr && article.hook && (
-          <p className="border-l-2 border-[var(--marker)]/50 pl-3 text-sm italic leading-relaxed text-[var(--foreground)]/90">
+          <p className="max-w-[95%] border-l-2 border-[var(--marker)]/50 pl-3 text-sm italic leading-relaxed text-[var(--foreground)]/90">
             {article.hook}
           </p>
         )}
 
         {paragraphs ? (
-          <div className="space-y-2 text-[15px] leading-relaxed text-[var(--foreground)]/75">
+          <div className="max-w-[95%] space-y-2 text-[15px] leading-relaxed text-[var(--foreground)]/75">
             {paragraphs.map((p, i) => (
               <p key={i}>{p}</p>
             ))}
           </div>
         ) : (
-          article.excerpt && <p className="line-clamp-3 text-[15px] leading-relaxed text-[var(--foreground)]/65">{article.excerpt}</p>
+          article.excerpt && <p className="line-clamp-3 max-w-[95%] text-[15px] leading-relaxed text-[var(--foreground)]/65">{article.excerpt}</p>
         )}
 
         {(article.assets.length > 0 || article.exchanges.length > 0) && (

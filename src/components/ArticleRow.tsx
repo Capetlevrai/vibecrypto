@@ -56,7 +56,7 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
           <div className="order-2 flex min-w-0 flex-col gap-1.5 sm:order-1 sm:max-w-[40rem]">
             <h3
               title={displayTitle}
-              className="font-display text-lg font-semibold leading-snug tracking-tight sm:text-xl"
+              className="font-display text-[19px] font-semibold leading-snug tracking-tight sm:text-[21px]"
             >
               <Link
                 href={`/item/${article.id}`}
@@ -66,11 +66,11 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
               </Link>
             </h3>
             {blurb && (
-              <p className="line-clamp-2 text-[13px] leading-relaxed text-[var(--foreground)]/65">{blurb}</p>
+              <p className="line-clamp-2 max-w-[95%] text-[13px] leading-relaxed text-[var(--foreground)]/65">{blurb}</p>
             )}
           </div>
 
-          <div className="order-1 flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-[var(--muted)] sm:order-2 sm:w-36 sm:flex-col sm:items-end sm:gap-2 sm:text-right">
+          <div className="order-1 flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-[var(--muted)] sm:order-2 sm:w-36 sm:self-stretch sm:flex-col sm:items-end sm:gap-2 sm:text-right">
             <span className="inline-flex min-w-0 items-center gap-1.5 font-mono">
               <span
                 className="inline-block h-2 w-2 shrink-0 rounded-full ring-2 ring-[var(--surface)]"
@@ -110,7 +110,7 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
               href={sourceHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono text-[11px] uppercase tracking-wide text-[var(--foreground)]/70 transition-colors hover:text-[var(--marker)]"
+              className="font-mono text-[11px] uppercase tracking-wide text-[var(--foreground)]/70 transition-colors hover:text-[var(--marker)] sm:mb-1 sm:mt-auto"
             >
               Source ↗
             </a>
