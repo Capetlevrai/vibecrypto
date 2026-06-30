@@ -17,8 +17,19 @@ export function makeParser(): Parser {
   });
 }
 
+// Deballe les URLs d'optimiseur Next.js (/_next/image?url=...) -> image directe.
+function unwrapNextImage(src: string): string {
+  const m = src.match(/\/_next\/image\?url=([^&]+)/i);
+  if (!m) return src;
+  try {
+    return decodeURIComponent(m[1]);
+  } catch {
+    return m[1];
+  }
+}
+
 function absolutize(src: string, base?: string): string | undefined {
-  const trimmed = src.trim();
+  const trimmed = unwrapNextImage(src.trim());
   if (!trimmed) return undefined;
   if (!base) return trimmed;
   try {

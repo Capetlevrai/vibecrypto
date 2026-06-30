@@ -1,19 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import type { Article } from "@/lib/types";
+import type { Lang } from "@/components/ArticleFeed";
 import { ASSET_LABELS, EXCHANGE_LABELS, SOURCE_COLORS, SOURCE_LABELS } from "@/lib/types";
 import { formatHour, timeAgo } from "@/lib/fmt";
-import { cn } from "@/lib/cn";
+import { useState } from "react";
 
-export function ArticleCard({ article }: { article: Article }) {
+export function ArticleCard({ article, lang }: { article: Article; lang: Lang }) {
   const [imgError, setImgError] = useState(false);
-  const [showOriginal, setShowOriginal] = useState(false);
 
   const sourceColor = SOURCE_COLORS[article.source];
-  const hasSummary = Boolean(article.summary);
-  const displayTitle = showOriginal ? article.title : article.titleFr ?? article.title;
+  const fr = lang === "fr";
+  const translated = fr && Boolean(article.titleFr);
+  const displayTitle = fr ? article.titleFr ?? article.title : article.title;
+  const paragraphs = fr && article.summary ? article.summary.split(/\n\n+/) : null;
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]/70 backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:border-[var(--accent)]/40 hover:bg-[var(--surface)] hover:shadow-xl hover:shadow-black/40">
@@ -36,13 +37,8 @@ export function ArticleCard({ article }: { article: Article }) {
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="flex items-center justify-between gap-2 text-xs text-[var(--muted)]">
           <span className="inline-flex items-center gap-1.5 font-medium">
-            <span
-              className="inline-block h-2 w-2 rounded-full ring-2 ring-[var(--surface)]"
-              style={{ background: sourceColor }}
-            />
-            <span className="text-[var(--foreground)]/80">
-              {article.sourceName ?? SOURCE_LABELS[article.source]}
-            </span>
+            <span className="inline-block h-2 w-2 rounded-full ring-2 ring-[var(--surface)]" style={{ background: sourceColor }} />
+            <span className="text-[var(--foreground)]/80">{article.sourceName ?? SOURCE_LABELS[article.source]}</span>
           </span>
           <span
             suppressHydrationWarning
@@ -53,45 +49,26 @@ export function ArticleCard({ article }: { article: Article }) {
           </span>
         </div>
 
-        <h3
-          title={displayTitle}
-          className="min-h-[3.75rem] text-base font-semibold leading-snug tracking-tight"
-        >
-          <Link
-            href={`/item/${article.id}`}
-            className="line-clamp-3 transition-colors hover:text-[var(--accent)]"
-          >
+        <h3 title={displayTitle} className="min-h-[3.75rem] text-base font-semibold leading-snug tracking-tight">
+          <Link href={`/item/${article.id}`} className="line-clamp-3 transition-colors hover:text-[var(--accent)]">
             {displayTitle}
           </Link>
         </h3>
 
-        {article.hook && !showOriginal && (
+        {fr && article.hook && (
           <p className="border-l-2 border-[var(--accent)]/60 pl-3 text-sm italic leading-relaxed text-[var(--foreground)]/90">
             {article.hook}
           </p>
         )}
 
-        {hasSummary && !showOriginal ? (
+        {paragraphs ? (
           <div className="space-y-2 text-sm leading-relaxed text-[var(--foreground)]/75">
-            {article.summary!.split(/\n\n+/).map((p, i) => (
+            {paragraphs.map((p, i) => (
               <p key={i}>{p}</p>
             ))}
           </div>
         ) : (
-          article.excerpt && (
-            <p className={cn("text-sm leading-relaxed text-[var(--muted)]", !showOriginal && "line-clamp-3")}>
-              {article.excerpt}
-            </p>
-          )
-        )}
-
-        {hasSummary && article.excerpt && (
-          <button
-            onClick={() => setShowOriginal((v) => !v)}
-            className="self-start text-[11px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
-          >
-            {showOriginal ? "← Voir le résumé FR" : "Voir l'original →"}
-          </button>
+          article.excerpt && <p className="line-clamp-3 text-sm leading-relaxed text-[var(--muted)]">{article.excerpt}</p>
         )}
 
         {(article.assets.length > 0 || article.exchanges.length > 0) && (
@@ -115,7 +92,12 @@ export function ArticleCard({ article }: { article: Article }) {
           </div>
         )}
 
-        <div className="mt-auto flex flex-wrap items-center gap-2 border-t border-[var(--border)]/60 pt-3">
+        <div className="mt-auto flex flex-col gap-2 border-t border-[var(--border)]/60 pt-3">
+          {translated && (
+            <p className="text-[11px] leading-snug text-[var(--muted)]/70" title={article.title}>
+              <span className="font-medium">VO·</span> {article.title}
+            </p>
+          )}
           <a
             href={article.url}
             target="_blank"

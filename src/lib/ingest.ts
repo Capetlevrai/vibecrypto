@@ -5,6 +5,7 @@ import { ADAPTERS } from "./sources";
 import { tagText } from "./tagging";
 import { summarizePending, type BatchSummaryResult } from "./summarize-batch";
 import { perSourceMax } from "./config";
+import { logEvent } from "./logs";
 import type { RawArticle } from "./sources";
 
 export function normalizeUrl(raw: string): string {
@@ -106,6 +107,18 @@ export async function runIngest(opts: { only?: string[] } = {}): Promise<IngestR
     .insert(meta)
     .values({ key: "lastRefresh", value: String(now) })
     .onConflictDoUpdate({ target: meta.key, set: { value: String(now) } });
+
+  const sourceErrors = Object.entries(perSource).filter(([, v]) => v.error);
+  const hasError = sourceErrors.length > 0 || summary.failed > 0;
+  await logEvent({
+    level: hasError ? "error" : "info",
+    event: "ingest",
+    message:
+      `articles ${inserted}/${total} insérés; résumés ${summary.summarized}/${summary.candidates} (échecs ${summary.failed})` +
+      (sourceErrors.length ? `; sources en erreur: ${sourceErrors.map(([s]) => s).join(", ")}` : "") +
+      (summary.skippedReason ? `; résumé: ${summary.skippedReason}` : ""),
+    data: { inserted, total, perSource, summary },
+  });
 
   return { total, inserted, perSource, summary };
 }

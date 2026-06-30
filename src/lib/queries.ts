@@ -35,6 +35,27 @@ function mapRow(r: typeof articles.$inferSelect): Article {
   };
 }
 
+// Selection legere: tout sauf rawContent (inutile pour les listes/cartes, gros payload).
+const listColumns = {
+  id: articles.id,
+  title: articles.title,
+  titleFr: articles.titleFr,
+  hook: articles.hook,
+  excerpt: articles.excerpt,
+  summary: articles.summary,
+  summaryModel: articles.summaryModel,
+  summaryAt: articles.summaryAt,
+  url: articles.url,
+  imageUrl: articles.imageUrl,
+  source: articles.source,
+  sourceName: articles.sourceName,
+  publishedAt: articles.publishedAt,
+  fetchedAt: articles.fetchedAt,
+  assets: articles.assets,
+  exchanges: articles.exchanges,
+  score: articles.score,
+} as const;
+
 export async function getArticles(f: Filters = {}): Promise<Article[]> {
   const conds = [];
   if (f.sources && f.sources.length) conds.push(inArray(articles.source, f.sources));
@@ -47,13 +68,19 @@ export async function getArticles(f: Filters = {}): Promise<Article[]> {
   if (f.hasSummary) conds.push(isNotNull(articles.summary));
 
   const rows = await db
-    .select()
+    .select(listColumns)
     .from(articles)
     .where(conds.length ? and(...conds) : undefined)
     .orderBy(desc(articles.publishedAt), desc(articles.fetchedAt))
     .limit(f.limit ?? 120);
 
-  return rows.map(mapRow);
+  return rows.map((r) => ({
+    ...r,
+    source: r.source as Article["source"],
+    assets: (r.assets as string[] | null) ?? [],
+    exchanges: (r.exchanges as string[] | null) ?? [],
+    rawContent: null,
+  }));
 }
 
 export async function getArticle(id: string): Promise<Article | null> {

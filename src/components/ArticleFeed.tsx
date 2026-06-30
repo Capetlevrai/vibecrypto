@@ -1,13 +1,18 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import type { Article } from "@/lib/types";
 import { ArticleCard } from "@/components/ArticleCard";
 import { ArticleRow } from "@/components/ArticleRow";
+import { FilterBar, type FilterState, type Facet } from "@/components/FilterBar";
 import { cn } from "@/lib/cn";
 
+const EMPTY_FILTERS: FilterState = { assets: [], exchanges: [], sources: [], q: "", hasSummary: false };
+
+export type Lang = "fr" | "source";
 type View = "list" | "grid";
-const STORAGE_KEY = "vc:view";
+const VIEW_KEY = "vc:view";
+const LANG_KEY = "vc:lang";
 const listeners = new Set<() => void>();
 
 function subscribe(cb: () => void) {
@@ -20,52 +25,117 @@ function subscribe(cb: () => void) {
 }
 
 function getSnapshot(): View {
-  return window.localStorage.getItem(STORAGE_KEY) === "grid" ? "grid" : "list";
+  return window.localStorage.getItem(VIEW_KEY) === "grid" ? "grid" : "list";
 }
-
 function getServerSnapshot(): View {
   return "list";
 }
-
 function select(next: View) {
-  window.localStorage.setItem(STORAGE_KEY, next);
+  window.localStorage.setItem(VIEW_KEY, next);
+  listeners.forEach((l) => l());
+}
+
+function getLangSnapshot(): Lang {
+  return window.localStorage.getItem(LANG_KEY) === "source" ? "source" : "fr";
+}
+function getLangServerSnapshot(): Lang {
+  return "fr";
+}
+function selectLang(next: Lang) {
+  window.localStorage.setItem(LANG_KEY, next);
   listeners.forEach((l) => l());
 }
 
 export function ArticleFeed({ articles }: { articles: Article[] }) {
   const view = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const lang = useSyncExternalStore(subscribe, getLangSnapshot, getLangServerSnapshot);
+  const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
+
+  const filtered = useMemo(() => {
+    const q = filters.q.trim().toLowerCase();
+    return articles.filter((a) => {
+      if (filters.assets.length && !filters.assets.some((x) => a.assets.includes(x))) return false;
+      if (filters.exchanges.length && !filters.exchanges.some((x) => a.exchanges.includes(x))) return false;
+      if (filters.sources.length && !filters.sources.includes(a.source)) return false;
+      if (filters.hasSummary && !a.summary) return false;
+      if (q) {
+        const hay = [a.title, a.titleFr, a.hook, a.summary, a.excerpt]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [articles, filters]);
+
+  const toggle = (facet: Facet, value: string) =>
+    setFilters((f) => {
+      const cur = f[facet];
+      return { ...f, [facet]: cur.includes(value) ? cur.filter((v) => v !== value) : [...cur, value] };
+    });
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-end">
-        <div className="inline-flex items-center gap-0.5 rounded-lg border border-[var(--border)] bg-[var(--surface)]/60 p-0.5">
-          <ToggleButton
-            label="Vue liste"
-            active={view === "list"}
-            onClick={() => select("list")}
+      <FilterBar
+        filters={filters}
+        onToggle={toggle}
+        onSearch={(q) => setFilters((f) => ({ ...f, q }))}
+        onToggleSummary={() => setFilters((f) => ({ ...f, hasSummary: !f.hasSummary }))}
+        onReset={() => setFilters(EMPTY_FILTERS)}
+        total={filtered.length}
+      />
+
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <div className="inline-flex items-center gap-0.5 rounded-lg border border-[var(--border)] bg-[var(--surface)]/60 p-0.5 text-xs font-medium">
+          <button
+            type="button"
+            onClick={() => selectLang("fr")}
+            aria-pressed={lang === "fr"}
+            className={cn(
+              "rounded-md px-2.5 py-1 transition-colors",
+              lang === "fr" ? "bg-[var(--accent)]/20 text-[var(--accent)]" : "text-[var(--muted)] hover:text-[var(--foreground)]",
+            )}
           >
+            🇫🇷 Français
+          </button>
+          <button
+            type="button"
+            onClick={() => selectLang("source")}
+            aria-pressed={lang === "source"}
+            className={cn(
+              "rounded-md px-2.5 py-1 transition-colors",
+              lang === "source" ? "bg-[var(--accent)]/20 text-[var(--accent)]" : "text-[var(--muted)] hover:text-[var(--foreground)]",
+            )}
+          >
+            🌐 Source
+          </button>
+        </div>
+
+        <div className="inline-flex items-center gap-0.5 rounded-lg border border-[var(--border)] bg-[var(--surface)]/60 p-0.5">
+          <ToggleButton label="Vue liste" active={view === "list"} onClick={() => select("list")}>
             <ListIcon />
           </ToggleButton>
-          <ToggleButton
-            label="Vue blocs"
-            active={view === "grid"}
-            onClick={() => select("grid")}
-          >
+          <ToggleButton label="Vue blocs" active={view === "grid"} onClick={() => select("grid")}>
             <GridIcon />
           </ToggleButton>
         </div>
       </div>
 
-      {view === "list" ? (
+      {filtered.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-[var(--border)] p-10 text-center text-sm text-[var(--muted)]">
+          Aucun article pour ces filtres.
+        </div>
+      ) : view === "list" ? (
         <div className="flex flex-col gap-2.5">
-          {articles.map((a) => (
-            <ArticleRow key={a.id} article={a} />
+          {filtered.map((a) => (
+            <ArticleRow key={a.id} article={a} lang={lang} />
           ))}
         </div>
       ) : (
         <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {articles.map((a) => (
-            <ArticleCard key={a.id} article={a} />
+          {filtered.map((a) => (
+            <ArticleCard key={a.id} article={a} lang={lang} />
           ))}
         </div>
       )}

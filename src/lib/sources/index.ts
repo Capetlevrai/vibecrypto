@@ -1,8 +1,6 @@
 import type { SourceAdapter } from "./types";
 import { coinacademy } from "./coinacademy";
 import { todayonchain } from "./todayonchain";
-import { asksurf } from "./asksurf";
-import { cryptopanic } from "./cryptopanic";
 import { protos } from "./protos";
 import { bankless } from "./bankless";
 import { helius } from "./helius";
@@ -13,8 +11,6 @@ import { hyperliquidr } from "./hyperliquidr";
 export const ADAPTERS: SourceAdapter[] = [
   coinacademy,
   todayonchain,
-  asksurf,
-  cryptopanic,
   protos,
   bankless,
   helius,
@@ -30,8 +26,6 @@ export function getAdapter(source: string): SourceAdapter | undefined {
 export {
   coinacademy,
   todayonchain,
-  asksurf,
-  cryptopanic,
   protos,
   bankless,
   helius,

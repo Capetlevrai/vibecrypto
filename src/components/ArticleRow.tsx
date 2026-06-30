@@ -4,15 +4,18 @@ import { useState } from "react";
 import Link from "next/link";
 import type { Article } from "@/lib/types";
 import { ASSET_LABELS, EXCHANGE_LABELS, SOURCE_COLORS, SOURCE_LABELS } from "@/lib/types";
+import type { Lang } from "@/components/ArticleFeed";
 import { formatHour, timeAgo } from "@/lib/fmt";
 
-export function ArticleRow({ article }: { article: Article }) {
+export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) {
   const [imgError, setImgError] = useState(false);
 
   const sourceColor = SOURCE_COLORS[article.source];
   const sourceName = article.sourceName ?? SOURCE_LABELS[article.source];
-  const blurb = article.summary ?? article.excerpt;
-  const displayTitle = article.titleFr ?? article.title;
+  const fr = lang === "fr";
+  const translated = fr && Boolean(article.titleFr);
+  const displayTitle = fr ? article.titleFr ?? article.title : article.title;
+  const blurb = fr ? article.summary ?? article.excerpt : article.excerpt;
   const hasTags = article.assets.length > 0 || article.exchanges.length > 0;
 
   return (
@@ -53,6 +56,11 @@ export function ArticleRow({ article }: { article: Article }) {
           {blurb && (
             <p className="line-clamp-2 max-w-2xl text-xs leading-relaxed text-[var(--muted)]">
               {blurb}
+            </p>
+          )}
+          {translated && (
+            <p className="max-w-2xl truncate text-[11px] text-[var(--muted)]/60" title={article.title}>
+              <span className="font-medium">VO·</span> {article.title}
             </p>
           )}
         </div>

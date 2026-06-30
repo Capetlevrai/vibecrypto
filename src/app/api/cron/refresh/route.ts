@@ -3,6 +3,7 @@ import { runIngest } from "@/lib/ingest";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
+export const preferredRegion = "cdg1";
 
 type AuthResult = { ok: true } | { ok: false; status: number; error: string };
 

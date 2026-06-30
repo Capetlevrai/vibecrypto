@@ -1,56 +1,39 @@
 "use client";
 
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback } from "react";
 import { ASSETS, ASSET_LABELS, EXCHANGES, EXCHANGE_LABELS, SOURCES, SOURCE_LABELS } from "@/lib/types";
 import { cn } from "@/lib/cn";
 
-const ASSET = "asset";
-const EXCHANGE = "exchange";
-const SOURCE = "source";
+export interface FilterState {
+  assets: string[];
+  exchanges: string[];
+  sources: string[];
+  q: string;
+  hasSummary: boolean;
+}
 
-export function FilterBar({ total }: { total: number }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const sp = useSearchParams();
+export type Facet = "assets" | "exchanges" | "sources";
 
-  const toggle = useCallback(
-    (key: string, value: string) => {
-      const params = new URLSearchParams(sp.toString());
-      const current = params.getAll(key);
-      params.delete(key);
-      const next = current.includes(value)
-        ? current.filter((v) => v !== value)
-        : [...current, value];
-      next.forEach((v) => params.append(key, v));
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    },
-    [sp, router, pathname],
-  );
-
-  const setSearch = (q: string) => {
-    const params = new URLSearchParams(sp.toString());
-    if (q.trim()) params.set("q", q.trim());
-    else params.delete("q");
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  };
-
-  const toggleSummary = () => {
-    const params = new URLSearchParams(sp.toString());
-    if (params.get("summary") === "1") params.delete("summary");
-    else params.set("summary", "1");
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  };
-
-  const reset = () => router.push(pathname, { scroll: false });
-
-  const active = (key: string, value: string) => sp.getAll(key).includes(value);
+export function FilterBar({
+  filters,
+  onToggle,
+  onSearch,
+  onToggleSummary,
+  onReset,
+  total,
+}: {
+  filters: FilterState;
+  onToggle: (facet: Facet, value: string) => void;
+  onSearch: (q: string) => void;
+  onToggleSummary: () => void;
+  onReset: () => void;
+  total: number;
+}) {
   const anyFilter =
-    sp.getAll(ASSET).length +
-      sp.getAll(EXCHANGE).length +
-      sp.getAll(SOURCE).length +
-      (sp.get("q") ? 1 : 0) +
-      (sp.get("summary") === "1" ? 1 : 0) >
+    filters.assets.length +
+      filters.exchanges.length +
+      filters.sources.length +
+      (filters.q ? 1 : 0) +
+      (filters.hasSummary ? 1 : 0) >
     0;
 
   return (
@@ -58,12 +41,7 @@ export function FilterBar({ total }: { total: number }) {
       <div className="mx-auto flex max-w-6xl flex-col gap-2.5">
         <FilterGroup label="Assets">
           {ASSETS.map((a) => (
-            <Chip
-              key={a}
-              active={active(ASSET, a)}
-              onClick={() => toggle(ASSET, a)}
-              tone="accent"
-            >
+            <Chip key={a} active={filters.assets.includes(a)} onClick={() => onToggle("assets", a)} tone="accent">
               {ASSET_LABELS[a]}
             </Chip>
           ))}
@@ -71,12 +49,7 @@ export function FilterBar({ total }: { total: number }) {
 
         <FilterGroup label="Exchanges">
           {EXCHANGES.map((e) => (
-            <Chip
-              key={e}
-              active={active(EXCHANGE, e)}
-              onClick={() => toggle(EXCHANGE, e)}
-              tone="accent2"
-            >
+            <Chip key={e} active={filters.exchanges.includes(e)} onClick={() => onToggle("exchanges", e)} tone="accent2">
               {EXCHANGE_LABELS[e]}
             </Chip>
           ))}
@@ -84,12 +57,7 @@ export function FilterBar({ total }: { total: number }) {
 
         <FilterGroup label="Sources">
           {SOURCES.map((s) => (
-            <Chip
-              key={s}
-              active={active(SOURCE, s)}
-              onClick={() => toggle(SOURCE, s)}
-              tone="muted"
-            >
+            <Chip key={s} active={filters.sources.includes(s)} onClick={() => onToggle("sources", s)} tone="muted">
               {SOURCE_LABELS[s]}
             </Chip>
           ))}
@@ -99,18 +67,16 @@ export function FilterBar({ total }: { total: number }) {
           <input
             type="search"
             placeholder="Rechercher (titre, résumé…)"
-            defaultValue={sp.get("q") ?? ""}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") setSearch((e.target as HTMLInputElement).value);
-            }}
+            value={filters.q}
+            onChange={(e) => onSearch(e.target.value)}
             className="min-w-[200px] flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm outline-none transition-colors placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
           />
-          <Chip active={sp.get("summary") === "1"} onClick={toggleSummary} tone="accent">
+          <Chip active={filters.hasSummary} onClick={onToggleSummary} tone="accent">
             Avec résumé
           </Chip>
           {anyFilter && (
             <button
-              onClick={reset}
+              onClick={onReset}
               className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-xs text-[var(--muted)] hover:text-[var(--foreground)]"
             >
               Réinitialiser
@@ -123,18 +89,10 @@ export function FilterBar({ total }: { total: number }) {
   );
 }
 
-function FilterGroup({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className="mr-1 w-[70px] text-[10px] uppercase tracking-wider text-[var(--muted)]">
-        {label}
-      </span>
+      <span className="mr-1 w-[70px] text-[10px] uppercase tracking-wider text-[var(--muted)]">{label}</span>
       {children}
     </div>
   );

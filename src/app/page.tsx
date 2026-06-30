@@ -1,19 +1,15 @@
-import { Suspense } from "react";
-import { FilterBar } from "@/components/FilterBar";
 import { ArticleFeed } from "@/components/ArticleFeed";
 import { RefreshButton } from "@/components/RefreshButton";
 import { getArticles, getArticleCounts } from "@/lib/queries";
-import { parseFilters } from "@/lib/filters";
 import { getLastRefresh } from "@/lib/ingest";
 import { timeAgo } from "@/lib/fmt";
 
 export const dynamic = "force-dynamic";
+export const preferredRegion = "cdg1";
 
-export default async function Page(props: PageProps<"/">) {
-  const sp = await props.searchParams;
-  const filters = parseFilters(sp as Record<string, string | string[] | undefined>);
+export default async function Page() {
   const [items, counts, lastRefresh] = await Promise.all([
-    getArticles(filters),
+    getArticles({ limit: 300 }),
     getArticleCounts(),
     getLastRefresh(),
   ]);
@@ -46,10 +42,6 @@ export default async function Page(props: PageProps<"/">) {
         </div>
       </header>
 
-      <Suspense fallback={null}>
-        <FilterBar total={items.length} />
-      </Suspense>
-
       {items.length === 0 ? <EmptyState /> : <ArticleFeed articles={items} />}
     </main>
   );
@@ -58,7 +50,7 @@ export default async function Page(props: PageProps<"/">) {
 function EmptyState() {
   return (
     <div className="rounded-xl border border-dashed border-[var(--border)] p-10 text-center">
-      <h2 className="mb-2 text-lg font-semibold">Aucun article pour ces filtres</h2>
+      <h2 className="mb-2 text-lg font-semibold">Aucun article pour le moment</h2>
       <p className="mx-auto max-w-md text-sm text-[var(--muted)]">
         Lance une première ingestion pour remplir la base :
       </p>

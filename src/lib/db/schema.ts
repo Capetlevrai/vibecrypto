@@ -39,3 +39,19 @@ export const meta = sqliteTable("meta", {
 });
 
 export type MetaRow = typeof meta.$inferSelect;
+
+// Journal d'evenements (ingestion, erreurs, rate-limit) pour le debug prod.
+export const logs = sqliteTable(
+  "logs",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    ts: integer("ts").notNull(),
+    level: text("level").notNull(),
+    event: text("event").notNull(),
+    message: text("message"),
+    data: text("data", { mode: "json" }),
+  },
+  (t) => [index("logs_ts_idx").on(t.ts)],
+);
+
+export type LogRow = typeof logs.$inferSelect;

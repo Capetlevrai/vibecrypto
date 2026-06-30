@@ -47,8 +47,6 @@ export const EXCHANGE_LABELS: Record<Exchange, string> = {
 export const SOURCES = [
   "coinacademy",
   "todayonchain",
-  "asksurf",
-  "cryptopanic",
   "protos",
   "bankless",
   "helius",
@@ -61,8 +59,6 @@ export type Source = (typeof SOURCES)[number];
 export const SOURCE_LABELS: Record<Source, string> = {
   coinacademy: "Coinacademy",
   todayonchain: "TodayOnChain",
-  asksurf: "AskSurf Pulse",
-  cryptopanic: "CryptoPanic",
   protos: "Protos",
   bankless: "Bankless",
   helius: "Helius",
@@ -74,8 +70,6 @@ export const SOURCE_LABELS: Record<Source, string> = {
 export const SOURCE_COLORS: Record<Source, string> = {
   coinacademy: "#f7931a",
   todayonchain: "#6f7cff",
-  asksurf: "#22d3ee",
-  cryptopanic: "#a855f7",
   protos: "#ff4d4d",
   bankless: "#3b82f6",
   helius: "#e84142",

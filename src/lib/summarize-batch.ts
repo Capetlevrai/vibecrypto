@@ -9,6 +9,7 @@ export interface BatchSummaryResult {
   summarized: number;
   failed: number;
   skippedReason?: string;
+  errors?: string[];
 }
 
 async function runWithConcurrency<T>(
@@ -61,10 +62,12 @@ export async function summarizePending(): Promise<BatchSummaryResult> {
 
   let summarized = 0;
   let failed = 0;
+  const errors: string[] = [];
 
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   await runWithConcurrency(pending, cfg.concurrency, async (row) => {
+    let lastErr = "";
     // Jusqu'a 3 tentatives avec backoff: encaisse les rate-limits (429) transitoires.
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
@@ -86,12 +89,14 @@ export async function summarizePending(): Promise<BatchSummaryResult> {
           .where(eq(articles.id, row.id));
         summarized += 1;
         return;
-      } catch {
+      } catch (e) {
+        lastErr = e instanceof Error ? e.message : String(e);
         if (attempt < 2) await sleep(1500 * (attempt + 1));
       }
     }
     failed += 1;
+    if (lastErr && errors.length < 5 && !errors.includes(lastErr)) errors.push(lastErr);
   });
 
-  return { candidates: pending.length, summarized, failed };
+  return { candidates: pending.length, summarized, failed, errors: errors.length ? errors : undefined };
 }

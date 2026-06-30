@@ -11,7 +11,7 @@ export const ASSET_PATTERNS: Pattern[] = [
   { tag: "BTC", label: "Bitcoin", re: /\b(bitcoin|btc)\b/i },
   { tag: "ETH", label: "Ethereum", re: /\b(ethereum|\beth\b|ether(?:eum)?|vitalik)\b/i },
   { tag: "SOL", label: "Solana", re: /\b(solana|solana labs)\b/i },
-  { tag: "HYPE", label: "Hyperliquid", re: /\b(hyperliquid|\bhype\b|\bhl\b token)\b/i },
+  { tag: "HYPE", label: "Hyperliquid", re: /(\bhyperliquid\b|\$hype\b|\bhype token\b|\btoken hype\b)/i },
   { tag: "TAO", label: "Bittensor", re: /\b(bittensor|\btao\b)\b/i },
   { tag: "MORPHO", label: "Morpho", re: /\b(morpho)\b/i },
   { tag: "AAVE", label: "Aave", re: /\b(aave)\b/i },

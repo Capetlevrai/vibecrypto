@@ -6,6 +6,7 @@ import { formatDateTime } from "@/lib/fmt";
 import { SOURCE_LABELS } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+export const preferredRegion = "cdg1";
 
 export default async function ItemPage(props: PageProps<"/item/[id]">) {
   const { id } = await props.params;
@@ -21,7 +22,7 @@ export default async function ItemPage(props: PageProps<"/item/[id]">) {
         ← Retour au fil
       </Link>
 
-      <ArticleCard article={article} />
+      <ArticleCard article={article} lang="fr" />
 
       <section className="mt-6 rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-5">
         <h2 className="mb-2 text-sm font-semibold text-[var(--muted)]">Détails</h2>
