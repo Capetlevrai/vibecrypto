@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 160" role="img" aria-labelledby="title desc">
+  <title id="title">VibeCrypto</title>
+  <desc id="desc">Logo VibeCrypto avec marqueur jaune et signal crypto.</desc>
+  <rect width="720" height="160" fill="#060a0c"/>
+  <g transform="translate(24 26)">
+    <rect x="0" y="0" width="108" height="108" rx="18" fill="#eef0ea"/>
+    <path d="M24 70 40 38h14L40 70H24Zm33 0 16-32h14L71 70H57Z" fill="#060a0c"/>
+    <path d="M20 82h68" stroke="#f3de3b" stroke-width="12" stroke-linecap="square"/>
+    <path d="M89 36c14 12 14 36 0 48" fill="none" stroke="#46d1a0" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <g font-family="Space Grotesk, IBM Plex Sans, Arial, sans-serif" font-weight="700" letter-spacing="0">
+    <text x="160" y="100" font-size="72" fill="#eef0ea">Vibe</text>
+    <rect x="326" y="39" width="244" height="74" fill="#f3de3b" transform="rotate(-1 326 39)"/>
+    <text x="344" y="100" font-size="72" fill="#060a0c">Crypto</text>
+  </g>
+</svg>

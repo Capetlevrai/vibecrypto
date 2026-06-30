@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { eq } from "drizzle-orm";
 import { db } from "./db/client";
 import { articles, meta } from "./db/schema";
 import { ADAPTERS } from "./sources";
@@ -46,6 +47,7 @@ export async function runIngest(opts: { only?: string[] } = {}): Promise<IngestR
   let total = 0;
   let inserted = 0;
   const toInsert: (typeof articles.$inferInsert)[] = [];
+  const heliusImageUpdates: { urlHash: string; imageUrl: string }[] = [];
 
   adapters.forEach((adapter, i) => {
     const res = settled[i];
@@ -62,6 +64,10 @@ export async function runIngest(opts: { only?: string[] } = {}): Promise<IngestR
     perSource[adapter.source] = { fetched: list.length, inserted: 0 };
     for (const r of list) {
       const { assets, exchanges } = tagText(r.title, r.excerpt, r.rawContent);
+      const hash = urlHash(r.url);
+      if (r.source === "helius" && r.imageUrl) {
+        heliusImageUpdates.push({ urlHash: hash, imageUrl: r.imageUrl.slice(0, 1000) });
+      }
       toInsert.push({
         id: articleId(r.url),
         title: r.title.slice(0, 400),
@@ -72,7 +78,7 @@ export async function runIngest(opts: { only?: string[] } = {}): Promise<IngestR
         summaryAt: null,
         url: r.url,
         imageUrl: r.imageUrl?.slice(0, 1000) ?? null,
-        urlHash: urlHash(r.url),
+        urlHash: hash,
         source: r.source,
         sourceName: r.sourceName ?? null,
         publishedAt: r.publishedAt && !Number.isNaN(r.publishedAt) ? r.publishedAt : null,
@@ -98,6 +104,13 @@ export async function runIngest(opts: { only?: string[] } = {}): Promise<IngestR
       const bucket = perSource[row.source];
       if (bucket) bucket.inserted += 1;
     }
+  }
+
+  for (const update of heliusImageUpdates) {
+    await db
+      .update(articles)
+      .set({ imageUrl: update.imageUrl })
+      .where(eq(articles.urlHash, update.urlHash));
   }
 
   // Resume FR auto du backlog (articles sans resume), garde-fous dans summarize-batch.

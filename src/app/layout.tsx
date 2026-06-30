@@ -21,9 +21,21 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://vibecrypto.org"),
   title: "VibeCrypto — Veille crypto",
   description:
     "Veille crypto multi-sources (Coinacademy, TodayOnChain, AskSurf, CryptoPanic) avec résumés IA. BTC, ETH, SOL, Hyperliquid, Bittensor, Morpho, Aave, Uniswap, Sky, pump.fun.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
+  openGraph: {
+    title: "VibeCrypto — Veille crypto",
+    description:
+      "Veille crypto multi-sources avec résumés IA en français.",
+    images: ["/logo.svg"],
+  },
 };
 
 export default function RootLayout({
