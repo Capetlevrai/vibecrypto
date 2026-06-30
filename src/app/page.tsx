@@ -1,6 +1,5 @@
 import { ArticleFeed } from "@/components/ArticleFeed";
 import { LastRefreshIndicator } from "@/components/LastRefreshIndicator";
-import { RefreshButton } from "@/components/RefreshButton";
 import { getArticles } from "@/lib/queries";
 import { getLastRefresh } from "@/lib/ingest";
 
@@ -21,7 +20,6 @@ export default async function Page() {
         </h1>
         <div className="flex items-center gap-3">
           <LastRefreshIndicator initialLastRefresh={lastRefresh} />
-          <RefreshButton />
         </div>
       </header>
 
