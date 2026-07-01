@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ASSETS, ASSET_LABELS, EXCHANGES, EXCHANGE_LABELS, SOURCES, SOURCE_LABELS } from "@/lib/types";
 import { cn } from "@/lib/cn";
 
@@ -28,43 +29,16 @@ export function FilterBar({
   onReset: () => void;
   total: number;
 }) {
-  const anyFilter =
-    filters.assets.length +
-      filters.exchanges.length +
-      filters.sources.length +
-      (filters.q ? 1 : 0) +
-      (filters.hasSummary ? 1 : 0) >
-    0;
+  const [open, setOpen] = useState(false);
+
+  const facetCount = filters.assets.length + filters.exchanges.length + filters.sources.length;
+  const anyFilter = facetCount + (filters.q ? 1 : 0) + (filters.hasSummary ? 1 : 0) > 0;
 
   return (
     <div className="sticky top-0 z-20 -mx-4 mb-5 border-b border-[var(--border)] bg-[var(--background)]/85 px-4 py-3 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl flex-col gap-2.5">
-        <FilterGroup label="Assets">
-          {ASSETS.map((a) => (
-            <Chip key={a} active={filters.assets.includes(a)} onClick={() => onToggle("assets", a)} tone="asset">
-              {ASSET_LABELS[a]}
-            </Chip>
-          ))}
-        </FilterGroup>
-
-        <FilterGroup label="Exchanges">
-          {EXCHANGES.map((e) => (
-            <Chip key={e} active={filters.exchanges.includes(e)} onClick={() => onToggle("exchanges", e)} tone="exchange">
-              {EXCHANGE_LABELS[e]}
-            </Chip>
-          ))}
-        </FilterGroup>
-
-        <FilterGroup label="Sources">
-          {SOURCES.map((s) => (
-            <Chip key={s} active={filters.sources.includes(s)} onClick={() => onToggle("sources", s)} tone="bone">
-              {SOURCE_LABELS[s]}
-            </Chip>
-          ))}
-        </FilterGroup>
-
-        <div className="flex flex-wrap items-center gap-2 pt-0.5">
-          <div className="relative min-w-[200px] flex-1">
+        <div className="flex items-center gap-2">
+          <div className="relative min-w-0 flex-1">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-[var(--muted)]">
               /
             </span>
@@ -76,6 +50,55 @@ export function FilterBar({
               className="w-full rounded-md border border-[var(--border)] bg-[var(--surface)] py-1.5 pl-7 pr-3 text-sm outline-none transition-colors placeholder:text-[var(--muted)] focus:border-[var(--marker)]"
             />
           </div>
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-label="Afficher les filtres"
+            className={cn(
+              "inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-colors sm:hidden",
+              facetCount > 0
+                ? "border-[var(--marker)]/50 text-[var(--foreground)]"
+                : "border-[var(--border)] text-[var(--muted)]",
+            )}
+          >
+            Filtres
+            {facetCount > 0 && (
+              <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--marker)] px-1 text-[10px] font-semibold text-[var(--background)]">
+                {facetCount}
+              </span>
+            )}
+            <ChevronIcon className={cn("transition-transform", open && "rotate-180")} />
+          </button>
+        </div>
+
+        <div className={cn("flex-col gap-2.5", open ? "flex" : "hidden sm:flex")}>
+          <FilterGroup label="Assets">
+            {ASSETS.map((a) => (
+              <Chip key={a} active={filters.assets.includes(a)} onClick={() => onToggle("assets", a)} tone="asset">
+                {ASSET_LABELS[a]}
+              </Chip>
+            ))}
+          </FilterGroup>
+
+          <FilterGroup label="Exchanges">
+            {EXCHANGES.map((e) => (
+              <Chip key={e} active={filters.exchanges.includes(e)} onClick={() => onToggle("exchanges", e)} tone="exchange">
+                {EXCHANGE_LABELS[e]}
+              </Chip>
+            ))}
+          </FilterGroup>
+
+          <FilterGroup label="Sources">
+            {SOURCES.map((s) => (
+              <Chip key={s} active={filters.sources.includes(s)} onClick={() => onToggle("sources", s)} tone="bone">
+                {SOURCE_LABELS[s]}
+              </Chip>
+            ))}
+          </FilterGroup>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 pt-0.5">
           <Chip active={filters.hasSummary} onClick={onToggleSummary} tone="asset">
             Avec résumé
           </Chip>
@@ -93,6 +116,25 @@ export function FilterBar({
         </div>
       </div>
     </div>
+  );
+}
+
+function ChevronIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
   );
 }
 
