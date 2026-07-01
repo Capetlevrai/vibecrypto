@@ -11,6 +11,11 @@ export function formatHour(ms: number | null | undefined): string {
   return format(new Date(ms), "d MMM, HH'h'", { locale: fr });
 }
 
+export function formatDayShort(ms: number | null | undefined): string {
+  if (!ms || Number.isNaN(ms)) return "—";
+  return format(new Date(ms), "dd/MM · HH'h'", { locale: fr });
+}
+
 export function timeAgo(ms: number | null | undefined): string {
   if (!ms || Number.isNaN(ms)) return "—";
   return `il y a ${formatDistanceToNowStrict(new Date(ms), { locale: fr })}`;
