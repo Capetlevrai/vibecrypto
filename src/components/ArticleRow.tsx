@@ -56,7 +56,7 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
           <div className="flex min-w-0 flex-col gap-1.5 sm:max-w-[40rem]">
             <h3
               title={displayTitle}
-              className="font-display text-[17px] font-semibold leading-snug tracking-tight sm:text-[21px]"
+              className="font-display text-[19px] font-semibold leading-snug tracking-tight sm:text-[21px]"
             >
               <Link
                 href={`/item/${article.id}`}
@@ -66,7 +66,7 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
               </Link>
             </h3>
             {blurb && (
-              <p className="line-clamp-2 max-w-[95%] text-[13px] leading-relaxed text-[var(--foreground)]/65">{blurb}</p>
+              <p className="line-clamp-2 max-w-[95%] text-[12px] leading-relaxed text-[var(--foreground)]/65 sm:text-[13px]">{blurb}</p>
             )}
 
             <div className="mt-0.5 flex items-center justify-between gap-3 text-[11px] text-[var(--muted)] sm:hidden">
