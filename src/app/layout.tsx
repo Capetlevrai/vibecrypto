@@ -97,6 +97,10 @@ export default function RootLayout({
                 </a>
               </div>
             </div>
+
+            <p className="text-center text-[10px] normal-case tracking-normal text-[var(--muted)]/70">
+              Certains liens sont sponsorisés. VibeCrypto peut percevoir une commission.
+            </p>
           </div>
         </footer>
       </body>

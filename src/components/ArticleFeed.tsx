@@ -1,11 +1,21 @@
 "use client";
 
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { Fragment, useMemo, useState, useSyncExternalStore } from "react";
 import type { Article } from "@/lib/types";
 import { ArticleCard } from "@/components/ArticleCard";
 import { ArticleRow } from "@/components/ArticleRow";
+import { AdBanner } from "@/components/AdBanner";
 import { FilterBar, type FilterState, type Facet } from "@/components/FilterBar";
 import { cn } from "@/lib/cn";
+
+const AD_FIRST = 4;
+const AD_INTERVAL = 14;
+
+function showAdAfter(index: number, total: number): boolean {
+  const n = index + 1;
+  if (n < AD_FIRST || index >= total - 1) return false;
+  return (n - AD_FIRST) % AD_INTERVAL === 0;
+}
 
 const EMPTY_FILTERS: FilterState = { assets: [], exchanges: [], sources: [], q: "", hasSummary: false };
 
@@ -112,8 +122,11 @@ export function ArticleFeed({ articles }: { articles: Article[] }) {
         </div>
       ) : view === "list" ? (
         <div className="-mx-2 flex flex-col gap-2 sm:mx-0">
-          {filtered.map((a) => (
-            <ArticleRow key={a.id} article={a} lang={lang} />
+          {filtered.map((a, i) => (
+            <Fragment key={a.id}>
+              <ArticleRow article={a} lang={lang} />
+              {showAdAfter(i, filtered.length) && <AdBanner />}
+            </Fragment>
           ))}
         </div>
       ) : (
