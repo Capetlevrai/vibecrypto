@@ -53,7 +53,7 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
         </Link>
 
         <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-5">
-          <div className="order-2 flex min-w-0 flex-col gap-1.5 sm:order-1 sm:max-w-[40rem]">
+          <div className="flex min-w-0 flex-col gap-1.5 sm:max-w-[40rem]">
             <h3
               title={displayTitle}
               className="font-display text-[19px] font-semibold leading-snug tracking-tight sm:text-[21px]"
@@ -68,9 +68,59 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
             {blurb && (
               <p className="line-clamp-2 max-w-[95%] text-[13px] leading-relaxed text-[var(--foreground)]/65">{blurb}</p>
             )}
+
+            <div className="mt-1 flex items-end justify-between gap-3 text-[11px] text-[var(--muted)] sm:hidden">
+              <div className="flex min-w-0 flex-col gap-1.5">
+                <span className="inline-flex min-w-0 items-center gap-1.5 font-mono">
+                  <span
+                    className="inline-block h-2 w-2 shrink-0 rounded-full ring-2 ring-[var(--surface)]"
+                    style={{ background: sourceColor }}
+                  />
+                  <span className="truncate text-[var(--foreground)]/75">{sourceName}</span>
+                </span>
+                {hasTags && (
+                  <div className="flex flex-wrap items-center gap-1">
+                    {article.assets.map((a) => (
+                      <span
+                        key={a}
+                        className="rounded border border-[var(--asset)]/25 bg-[var(--asset)]/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-[var(--asset)]"
+                      >
+                        {ASSET_LABELS[a as keyof typeof ASSET_LABELS] ?? a}
+                      </span>
+                    ))}
+                    {article.exchanges.map((e) => (
+                      <span
+                        key={e}
+                        className="rounded border border-[var(--exchange)]/25 bg-[var(--exchange)]/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-[var(--exchange)]"
+                      >
+                        {EXCHANGE_LABELS[e as keyof typeof EXCHANGE_LABELS] ?? e}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="flex shrink-0 flex-col items-end gap-1 text-right">
+                <span
+                  suppressHydrationWarning
+                  className="flex flex-col items-end font-mono leading-tight tabular-nums"
+                  title={article.publishedAt ? new Date(article.publishedAt).toLocaleString("fr-FR") : ""}
+                >
+                  <span className="text-[var(--foreground)]/75">{formatHour(article.publishedAt)}</span>
+                  <span className="text-[var(--muted)]/80">{shortAgo(article.publishedAt)}</span>
+                </span>
+                <a
+                  href={sourceHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono uppercase tracking-wide text-[var(--foreground)]/70 transition-colors hover:text-[var(--marker)]"
+                >
+                  Source ↗
+                </a>
+              </div>
+            </div>
           </div>
 
-          <div className="order-1 flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-[var(--muted)] sm:order-2 sm:w-36 sm:self-stretch sm:flex-col sm:items-end sm:gap-2 sm:text-right">
+          <div className="hidden shrink-0 text-[11px] text-[var(--muted)] sm:flex sm:w-36 sm:flex-col sm:items-end sm:gap-2 sm:self-stretch sm:text-right">
             <span className="inline-flex min-w-0 items-center gap-1.5 font-mono">
               <span
                 className="inline-block h-2 w-2 shrink-0 rounded-full ring-2 ring-[var(--surface)]"
@@ -80,14 +130,14 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
             </span>
             <span
               suppressHydrationWarning
-              className="flex flex-col font-mono leading-tight tabular-nums text-[var(--muted)] sm:items-end"
+              className="flex flex-col items-end font-mono leading-tight tabular-nums text-[var(--muted)]"
               title={article.publishedAt ? new Date(article.publishedAt).toLocaleString("fr-FR") : ""}
             >
               <span>{formatHour(article.publishedAt)}</span>
               <span className="text-[var(--muted)]/80">{shortAgo(article.publishedAt)}</span>
             </span>
             {hasTags && (
-              <div className="flex flex-wrap items-center gap-1 sm:justify-end">
+              <div className="flex flex-wrap items-center justify-end gap-1">
                 {article.assets.map((a) => (
                   <span
                     key={a}
