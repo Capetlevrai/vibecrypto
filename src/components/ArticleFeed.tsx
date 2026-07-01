@@ -111,13 +111,13 @@ export function ArticleFeed({ articles }: { articles: Article[] }) {
           Aucune dépêche pour ces filtres
         </div>
       ) : view === "list" ? (
-        <div className="flex flex-col gap-2">
+        <div className="-mx-2 flex flex-col gap-2 sm:mx-0">
           {filtered.map((a) => (
             <ArticleRow key={a.id} article={a} lang={lang} />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="-mx-2 grid grid-cols-1 items-stretch gap-4 sm:mx-0 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((a) => (
             <ArticleCard key={a.id} article={a} lang={lang} />
           ))}

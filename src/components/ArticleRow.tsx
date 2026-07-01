@@ -66,7 +66,7 @@ export function ArticleRow({ article, lang }: { article: Article; lang: Lang }) 
               </Link>
             </h3>
             {blurb && (
-              <p className="line-clamp-2 max-w-[95%] text-[12px] leading-relaxed text-[var(--foreground)]/65 sm:text-[13px]">{blurb}</p>
+              <p className="line-clamp-2 max-w-full text-[12px] leading-relaxed text-[var(--foreground)]/65 sm:max-w-[95%] sm:text-[13px]">{blurb}</p>
             )}
 
             <div className="mt-0.5 flex items-center justify-between gap-3 text-[11px] text-[var(--muted)] sm:hidden">
