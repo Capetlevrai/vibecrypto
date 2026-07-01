@@ -4,17 +4,17 @@ import { Fragment, useMemo, useState, useSyncExternalStore } from "react";
 import type { Article } from "@/lib/types";
 import { ArticleCard } from "@/components/ArticleCard";
 import { ArticleRow } from "@/components/ArticleRow";
-import { AdBanner } from "@/components/AdBanner";
+import { PartnerCard } from "@/components/PartnerCard";
 import { FilterBar, type FilterState, type Facet } from "@/components/FilterBar";
 import { cn } from "@/lib/cn";
 
-const AD_FIRST = 4;
-const AD_INTERVAL = 14;
+const PARTNER_FIRST = 4;
+const PARTNER_INTERVAL = 14;
 
-function showAdAfter(index: number, total: number): boolean {
+function showPartnerAfter(index: number, total: number): boolean {
   const n = index + 1;
-  if (n < AD_FIRST || index >= total - 1) return false;
-  return (n - AD_FIRST) % AD_INTERVAL === 0;
+  if (n < PARTNER_FIRST || index >= total - 1) return false;
+  return (n - PARTNER_FIRST) % PARTNER_INTERVAL === 0;
 }
 
 const EMPTY_FILTERS: FilterState = { assets: [], exchanges: [], sources: [], q: "", hasSummary: false };
@@ -125,7 +125,7 @@ export function ArticleFeed({ articles }: { articles: Article[] }) {
           {filtered.map((a, i) => (
             <Fragment key={a.id}>
               <ArticleRow article={a} lang={lang} />
-              {showAdAfter(i, filtered.length) && <AdBanner />}
+              {showPartnerAfter(i, filtered.length) && <PartnerCard />}
             </Fragment>
           ))}
         </div>
