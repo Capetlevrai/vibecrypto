@@ -7,6 +7,12 @@ import { helius } from "./helius";
 import { taomedia } from "./taomedia";
 import { taodaily } from "./taodaily";
 import { hyperliquidr } from "./hyperliquidr";
+import { therage } from "./therage";
+import { solanafloor } from "./solanafloor";
+import { bscnews } from "./bscnews";
+import { bitcoinmagazine } from "./bitcoinmagazine";
+import { cryptoprowl } from "./cryptoprowl";
+import { wublockchain } from "./wublockchain";
 
 export const ADAPTERS: SourceAdapter[] = [
   coinacademy,
@@ -17,6 +23,12 @@ export const ADAPTERS: SourceAdapter[] = [
   taomedia,
   taodaily,
   hyperliquidr,
+  therage,
+  solanafloor,
+  bscnews,
+  bitcoinmagazine,
+  cryptoprowl,
+  wublockchain,
 ];
 
 export function getAdapter(source: string): SourceAdapter | undefined {
@@ -32,5 +44,11 @@ export {
   taomedia,
   taodaily,
   hyperliquidr,
+  therage,
+  solanafloor,
+  bscnews,
+  bitcoinmagazine,
+  cryptoprowl,
+  wublockchain,
 };
 export * from "./types";

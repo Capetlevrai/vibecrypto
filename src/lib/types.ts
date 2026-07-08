@@ -53,6 +53,12 @@ export const SOURCES = [
   "taomedia",
   "taodaily",
   "hyperliquidr",
+  "therage",
+  "solanafloor",
+  "bscnews",
+  "bitcoinmagazine",
+  "cryptoprowl",
+  "wublockchain",
 ] as const;
 export type Source = (typeof SOURCES)[number];
 
@@ -65,6 +71,12 @@ export const SOURCE_LABELS: Record<Source, string> = {
   taomedia: "TAO Media",
   taodaily: "TAO Daily",
   hyperliquidr: "HyperliquidR",
+  therage: "The Rage",
+  solanafloor: "SolanaFloor",
+  bscnews: "BSC News",
+  bitcoinmagazine: "Bitcoin Magazine",
+  cryptoprowl: "CryptoProwl",
+  wublockchain: "WuBlockchain",
 };
 
 export const SOURCE_COLORS: Record<Source, string> = {
@@ -76,6 +88,12 @@ export const SOURCE_COLORS: Record<Source, string> = {
   taomedia: "#14b8a6",
   taodaily: "#10b981",
   hyperliquidr: "#50d2c1",
+  therage: "#db2777",
+  solanafloor: "#9945ff",
+  bscnews: "#f3ba2f",
+  bitcoinmagazine: "#f97316",
+  cryptoprowl: "#0ea5e9",
+  wublockchain: "#94a3b8",
 };
 
 export interface Article {
