@@ -1,9 +1,10 @@
 import { loadEnvFile } from "@/lib/env";
 loadEnvFile();
 
-import { runIngest } from "@/lib/ingest";
-
 async function main() {
+  // Import dynamique: en ESM les imports statiques sont evalues avant
+  // loadEnvFile(), et db/client.ts fige son URL au chargement du module.
+  const { runIngest } = await import("@/lib/ingest");
   const only = process.argv.slice(2).filter((a) => !a.startsWith("-"));
   console.log("→ Ingestion VibeCrypto…", only.length ? `(sources: ${only.join(", ")})` : "(toutes les sources)");
   const result = await runIngest({ only: only.length ? only : undefined });
