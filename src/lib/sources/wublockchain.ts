@@ -3,6 +3,8 @@ import { makeParser, pickImage } from "./rss";
 
 const parser = makeParser();
 
+const DEFAULT_IMAGE = "/img/sources/wublockchain.jpg";
+
 export const wublockchain: SourceAdapter = {
   source: "wublockchain",
   label: "WuBlockchain",
@@ -20,7 +22,9 @@ export const wublockchain: SourceAdapter = {
       out.push({
         title,
         url,
-        imageUrl: pickImage(item as Record<string, unknown>, { baseUrl: "https://wublockchain.xyz" }),
+        imageUrl:
+          pickImage(item as Record<string, unknown>, { baseUrl: "https://wublockchain.xyz" }) ??
+          DEFAULT_IMAGE,
         excerpt: excerpt.slice(0, 600),
         rawContent: rawContent.slice(0, 8000),
         publishedAt: iso ? Date.parse(iso) : undefined,
