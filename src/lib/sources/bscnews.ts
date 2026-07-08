@@ -1,5 +1,6 @@
 import type { RawArticle, SourceAdapter } from "./types";
 import { makeParser, pickImage } from "./rss";
+import { tagText } from "../tagging";
 
 const parser = makeParser();
 
@@ -16,6 +17,10 @@ export const bscnews: SourceAdapter = {
       if (!title || !url) continue;
       const excerpt = (item.contentSnippet ?? item.content ?? "").trim();
       const rawContent = (item.content ?? excerpt).trim();
+      // BSC News melange beaucoup de contenu promo/altcoin hors scope: on ne
+      // garde que les articles qui mentionnent un asset ou un exchange suivi.
+      const tags = tagText(title, excerpt, rawContent);
+      if (!tags.assets.length && !tags.exchanges.length) continue;
       const iso = item.isoDate ?? item.pubDate;
       out.push({
         title,
