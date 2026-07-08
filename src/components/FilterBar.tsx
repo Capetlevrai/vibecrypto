@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ASSETS, ASSET_LABELS, EXCHANGES, EXCHANGE_LABELS, SOURCES, SOURCE_LABELS } from "@/lib/types";
 import { cn } from "@/lib/cn";
 
@@ -30,6 +30,32 @@ export function FilterBar({
   total: number;
 }) {
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const collapsedRef = useRef(false);
+
+  // Replie les groupes de filtres quand on scrolle vers le bas (hysteresis pour
+  // eviter le clignotement), afin de liberer de la hauteur hors des ecrans 4K.
+  useEffect(() => {
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const y = window.scrollY;
+        const next = collapsedRef.current ? y > 60 : y > 140;
+        if (next === collapsedRef.current) return;
+        collapsedRef.current = next;
+        setCollapsed(next);
+        if (next) setOpen(false);
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
 
   const facetCount = filters.assets.length + filters.exchanges.length + filters.sources.length;
   const anyFilter = facetCount + (filters.q ? 1 : 0) + (filters.hasSummary ? 1 : 0) > 0;
@@ -56,7 +82,8 @@ export function FilterBar({
             aria-expanded={open}
             aria-label="Afficher les filtres"
             className={cn(
-              "inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-colors sm:hidden",
+              "inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wide transition-colors",
+              collapsed ? "" : "sm:hidden",
               facetCount > 0
                 ? "border-[var(--marker)]/50 text-[var(--foreground)]"
                 : "border-[var(--border)] text-[var(--muted)]",
@@ -72,7 +99,7 @@ export function FilterBar({
           </button>
         </div>
 
-        <div className={cn("flex-col gap-2.5", open ? "flex" : "hidden sm:flex")}>
+        <div className={cn("flex-col gap-2.5", open ? "flex" : collapsed ? "hidden" : "hidden sm:flex")}>
           <FilterGroup label="Assets">
             {ASSETS.map((a) => (
               <Chip key={a} active={filters.assets.includes(a)} onClick={() => onToggle("assets", a)} tone="asset">
